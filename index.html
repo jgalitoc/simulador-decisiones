@@ -233,8 +233,8 @@ async function simulate(){
 
   const prompt = `Eres un simulador filosófico de decisiones vitales. Decisión: "${decision}"
 
-Responde ÚNICAMENTE con JSON válido sin markdown ni texto extra:
-{"decision_type":"simple|compleja|trascendental","essence":"Frase poética de 1-2 oraciones que captura la esencia.","scales":{"individual":{"si":{"label":"Si lo haces","text":"2 oraciones sobre consecuencias personales y emocionales."},"no":{"label":"Si no lo haces","text":"2 oraciones sobre consecuencias personales y emocionales."}},"familiar":{"si":{"label":"Si lo haces","text":"2 oraciones sobre impacto en familia y relaciones."},"no":{"label":"Si no lo haces","text":"2 oraciones sobre impacto en familia y relaciones."}},"social":{"si":{"label":"Si lo haces","text":"2 oraciones sobre efecto en comunidad y sociedad."},"no":{"label":"Si no lo haces","text":"2 oraciones sobre efecto en comunidad y sociedad."}},"global":{"si":{"label":"Si lo haces","text":"2 oraciones sobre impacto global y humanidad."},"no":{"label":"Si no lo haces","text":"2 oraciones sobre impacto global y humanidad."}}},"timeline":[{"time":"Próximas horas","text":"1 oración."},{"time":"Próximos meses","text":"1 oración."},{"time":"Próximos años","text":"1 oración."},{"time":"En décadas","text":"1 oración."},{"time":"Tu legado","text":"1 oración."}],"paradox":"2 oraciones sobre la paradoja oculta.","philosophy":"2 oraciones de reflexión filosófica sin juicio moral.","question":"Una pregunta socrática breve."}`;
+Responde ÚNICAMENTE con JSON válido sin markdown ni texto extra. Sé muy conciso, máximo 1 oración por campo:
+{"decision_type":"simple|compleja|trascendental","essence":"1 frase poética.","scales":{"individual":{"si":{"label":"Si lo haces","text":"1 oración."},"no":{"label":"Si no lo haces","text":"1 oración."}},"familiar":{"si":{"label":"Si lo haces","text":"1 oración."},"no":{"label":"Si no lo haces","text":"1 oración."}},"social":{"si":{"label":"Si lo haces","text":"1 oración."},"no":{"label":"Si no lo haces","text":"1 oración."}},"global":{"si":{"label":"Si lo haces","text":"1 oración."},"no":{"label":"Si no lo haces","text":"1 oración."}}},"timeline":[{"time":"Próximas horas","text":"1 oración."},{"time":"Próximos meses","text":"1 oración."},{"time":"Próximos años","text":"1 oración."},{"time":"En décadas","text":"1 oración."},{"time":"Tu legado","text":"1 oración."}],"paradox":"1 oración.","philosophy":"1 oración sin juicio moral.","question":"1 pregunta socrática breve."}`;
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -245,7 +245,7 @@ Responde ÚNICAMENTE con JSON válido sin markdown ni texto extra:
         'anthropic-version': '2023-06-01',
         'anthropic-dangerous-direct-browser-access': 'true'
       },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error?.message || 'Error API');
