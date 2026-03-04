@@ -1,374 +1,387 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Simulador de Decisiones Vitales</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0a0a12;--card:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.08);--accent:#a78bfa;--accent2:#60a5fa;--accent3:#34d399;--accent4:#fbbf24;--text:#e8e8f0;--muted:rgba(255,255,255,0.35)}
+:root{
+  --bg:#020818;--bg2:#040d22;
+  --blue:#00d4ff;--orange:#ff6b00;--cyan:#00ffea;--yellow:#ffe500;--pink:#ff6bff;
+  --text:#e8f4ff;--muted:rgba(200,220,255,0.45);
+  --card:rgba(0,180,255,0.04);--border:rgba(0,212,255,0.15);
+}
 html,body{min-height:100%;overflow-x:hidden}
-body{font-family:'Playfair Display',Georgia,serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center}
-.bg-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
-.o1{top:8%;left:4%;width:420px;height:420px;background:radial-gradient(circle,rgba(167,139,250,.06) 0%,transparent 70%);animation:pulse 8s ease infinite}
-.o2{bottom:12%;right:6%;width:360px;height:360px;background:radial-gradient(circle,rgba(96,165,250,.05) 0%,transparent 70%);animation:pulse 10s ease infinite 2s}
-.o3{top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(244,114,182,.03) 0%,transparent 70%);animation:pulse 12s ease infinite 4s}
-.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:60px 60px}
-.wrap{position:relative;z-index:1;width:100%;max-width:820px;padding:36px 18px 80px}
+body{font-family:'Exo 2',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center}
+
+/* BG */
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,180,255,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,255,0.07) 1px,transparent 1px);
+  background-size:50px 50px;
+  mask-image:radial-gradient(ellipse 90% 80% at 50% 30%,black 40%,transparent 100%)}
+.bg-glow{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 20% 10%,rgba(0,180,255,0.13) 0%,transparent 60%),
+             radial-gradient(ellipse 60% 40% at 80% 80%,rgba(255,107,0,0.11) 0%,transparent 60%),
+             radial-gradient(ellipse 40% 40% at 50% 50%,rgba(0,255,234,0.04) 0%,transparent 60%)}
+.bg-scan{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.025;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,1) 2px,rgba(0,212,255,1) 3px)}
+
+/* TOP BAR */
+.topbar{width:100%;background:linear-gradient(90deg,rgba(0,8,28,0.97),rgba(0,18,50,0.97));
+  border-bottom:2px solid var(--blue);padding:14px 24px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;z-index:10;
+  box-shadow:0 0 40px rgba(0,212,255,0.25),inset 0 -1px 0 rgba(0,212,255,0.3)}
+.topbar-inner{display:flex;align-items:center;gap:14px}
+.topbar-icon{font-size:26px;filter:drop-shadow(0 0 10px var(--blue))}
+.topbar-title{font-family:'Orbitron',monospace;font-size:clamp(13px,3vw,20px);font-weight:900;
+  letter-spacing:0.1em;text-transform:uppercase;
+  background:linear-gradient(90deg,var(--blue),var(--orange));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.topbar-sub{font-family:'Orbitron',monospace;font-size:8px;color:var(--muted);letter-spacing:0.2em;text-transform:uppercase;margin-top:3px}
+
+.wrap{position:relative;z-index:1;width:100%;max-width:880px;padding:30px 18px 80px}
 
 /* API KEY */
-.apibox{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:16px;padding:18px 20px;margin-bottom:28px}
-.apibox.ok{border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.05)}
-.api-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px}
+.apibox{background:rgba(0,20,55,0.85);border:1px solid rgba(0,212,255,0.2);
+  border-left:3px solid var(--blue);border-radius:8px;padding:16px 20px;margin-bottom:26px;
+  box-shadow:0 0 25px rgba(0,212,255,0.07)}
+.apibox.ok{border-left-color:var(--cyan);border-color:rgba(0,255,234,0.25)}
+.api-label{font-family:'Orbitron',monospace;font-size:10px;color:var(--blue);text-transform:uppercase;letter-spacing:.2em;margin-bottom:10px}
 .api-row{display:flex;gap:8px}
-.api-input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:10px 14px;outline:none;transition:border-color .2s}
-.api-input:focus{border-color:var(--accent)}
-.api-btn{background:linear-gradient(135deg,#a78bfa,#60a5fa);border:none;color:#0a0a12;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
-.api-ok{font-family:'DM Mono',monospace;font-size:11px;color:#34d399;margin-top:8px;display:none}
+.api-input{flex:1;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.18);
+  border-radius:6px;color:var(--text);font-family:'Exo 2',monospace;font-size:13px;
+  padding:10px 14px;outline:none;transition:border-color .2s}
+.api-input:focus{border-color:var(--blue);box-shadow:0 0 12px rgba(0,212,255,0.18)}
+.api-btn{background:linear-gradient(135deg,var(--blue),#0055dd);border:none;color:#000;
+  font-family:'Orbitron',monospace;font-size:10px;font-weight:700;padding:10px 18px;
+  border-radius:6px;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
+  box-shadow:0 0 15px rgba(0,212,255,0.3);transition:all .2s}
+.api-btn:hover{box-shadow:0 0 28px rgba(0,212,255,0.55)}
+.api-ok{font-family:'Orbitron',monospace;font-size:10px;color:var(--cyan);margin-top:8px;display:none;letter-spacing:.1em}
 .api-ok.show{display:block}
-.api-hint{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.3);margin-top:8px;line-height:1.6}
+.api-hint{font-family:'Exo 2',sans-serif;font-size:11px;color:var(--muted);margin-top:7px;line-height:1.6}
 
-/* HEADER */
-header{text-align:center;margin-bottom:44px}
-.header-tag{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.3em;margin-bottom:18px;opacity:.8}
-h1{font-size:clamp(30px,6vw,54px);font-weight:400;line-height:1.15;margin:0 0 16px;color:#f0f0fa}
-h1 em{color:var(--accent);font-style:italic}
-.header-sub{font-family:'DM Mono',monospace;font-size:13px;color:rgba(255,255,255,.4);line-height:1.8;max-width:480px;margin:0 auto}
+/* HERO */
+.hero{text-align:center;margin-bottom:36px;padding:14px 0}
+.hero-tag{display:inline-block;font-family:'Orbitron',monospace;font-size:9px;color:var(--orange);
+  text-transform:uppercase;letter-spacing:.3em;margin-bottom:18px;padding:6px 16px;
+  border:1px solid rgba(255,107,0,0.4);border-radius:2px;
+  box-shadow:0 0 18px rgba(255,107,0,0.18);animation:tagpulse 3s ease infinite}
+h1{font-family:'Orbitron',monospace;font-size:clamp(24px,6vw,54px);font-weight:900;
+  line-height:1.12;margin:0 0 14px;text-transform:uppercase;letter-spacing:.04em}
+h1 .l1{display:block;color:#fff;text-shadow:0 0 30px rgba(0,212,255,0.4),0 0 60px rgba(0,212,255,0.12)}
+h1 .l2{display:block;background:linear-gradient(90deg,var(--orange),var(--yellow),var(--orange));
+  background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;animation:shimmer 4s linear infinite}
+.hero-sub{font-family:'Exo 2',sans-serif;font-size:14px;font-weight:300;
+  color:var(--muted);line-height:1.85;max-width:480px;margin:0 auto;letter-spacing:.02em}
 
-/* INPUT SECTION */
-.input-card{background:var(--card);border:1px solid rgba(167,139,250,.2);border-radius:20px;padding:26px;margin-bottom:18px;box-shadow:0 0 60px rgba(167,139,250,.05)}
-.input-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px}
-#decisionInput{width:100%;background:transparent;border:none;color:var(--text);font-size:16px;line-height:1.7;font-family:'Playfair Display',serif;resize:none;outline:none;min-height:100px}
-#decisionInput::placeholder{color:rgba(255,255,255,.25)}
+/* INPUT CARD */
+.input-card{background:rgba(0,12,38,0.9);border:1px solid rgba(0,212,255,0.18);
+  border-top:2px solid var(--blue);border-radius:8px;padding:24px;margin-bottom:16px;
+  box-shadow:0 0 50px rgba(0,212,255,0.05),inset 0 1px 0 rgba(0,212,255,0.08);
+  position:relative;overflow:hidden}
+.input-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--blue),var(--orange),transparent);opacity:.5}
+.corner{position:absolute;width:12px;height:12px;opacity:.5}
+.c-tl{top:8px;left:8px;border-top:2px solid var(--blue);border-left:2px solid var(--blue)}
+.c-tr{top:8px;right:8px;border-top:2px solid var(--blue);border-right:2px solid var(--blue)}
+.c-bl{bottom:8px;left:8px;border-bottom:2px solid var(--blue);border-left:2px solid var(--blue)}
+.c-br{bottom:8px;right:8px;border-bottom:2px solid var(--blue);border-right:2px solid var(--blue)}
+.input-label{font-family:'Orbitron',monospace;font-size:10px;color:var(--blue);
+  text-transform:uppercase;letter-spacing:.18em;margin-bottom:13px;
+  display:flex;align-items:center;gap:8px}
+.input-label::before{content:'▶';color:var(--orange);font-size:8px}
+#decisionInput{width:100%;background:rgba(0,212,255,0.03);border:1px solid rgba(0,212,255,0.1);
+  border-radius:6px;color:var(--text);font-size:16px;line-height:1.7;
+  font-family:'Exo 2',sans-serif;font-weight:300;resize:none;outline:none;
+  min-height:100px;padding:12px;transition:border-color .2s}
+#decisionInput:focus{border-color:rgba(0,212,255,0.32);box-shadow:0 0 14px rgba(0,212,255,0.07)}
+#decisionInput::placeholder{color:rgba(200,220,255,0.18)}
 .input-footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:10px}
-.hint-key{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.2)}
-.sim-btn{background:linear-gradient(135deg,#a78bfa,#60a5fa);border:none;border-radius:12px;color:#0a0a12;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:12px 28px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:opacity .2s}
-.sim-btn:disabled{opacity:.4;cursor:not-allowed}
-.spinner{width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#0a0a12;border-radius:50%;animation:spin .7s linear infinite}
+.hint-key{font-family:'Orbitron',monospace;font-size:9px;color:rgba(0,212,255,0.28);letter-spacing:.1em}
+.sim-btn{background:linear-gradient(135deg,var(--orange),#bb4400);border:none;border-radius:6px;
+  color:#fff;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;padding:13px 30px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 0 22px rgba(255,107,0,0.38);transition:all .2s;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+.sim-btn:hover{box-shadow:0 0 38px rgba(255,107,0,0.6);transform:translateY(-1px)}
+.sim-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
 
 /* EXAMPLES */
-.examples-title{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px;text-align:center}
-.examples{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:32px}
-.ex-btn{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;color:rgba(255,255,255,.55);font-family:'DM Mono',monospace;font-size:11px;padding:7px 14px;cursor:pointer;transition:all .2s;line-height:1.4}
-.ex-btn:hover{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.3);color:var(--accent)}
+.ex-title{font-family:'Orbitron',monospace;font-size:9px;color:rgba(0,212,255,0.32);
+  text-transform:uppercase;letter-spacing:.2em;margin-bottom:10px;text-align:center}
+.examples{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:26px}
+.ex-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.14);border-radius:3px;
+  color:rgba(200,230,255,0.55);font-family:'Exo 2',sans-serif;font-size:12px;font-weight:300;
+  padding:7px 13px;cursor:pointer;transition:all .2s;line-height:1.4}
+.ex-btn:hover{background:rgba(0,212,255,0.12);border-color:rgba(0,212,255,0.4);color:var(--cyan)}
 
 /* ERROR */
-.error{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:12px;padding:12px 16px;color:#fca5a5;font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px;display:none}
+.error{background:rgba(255,50,50,.07);border:1px solid rgba(255,80,80,.28);border-left:3px solid #ff4444;
+  border-radius:6px;padding:11px 16px;color:#ff9999;font-family:'Orbitron',monospace;
+  font-size:11px;margin-bottom:14px;display:none;letter-spacing:.05em}
 .error.show{display:block}
 
 /* RESULT */
-#result{display:none;animation:fadeIn .5s ease both}
+#result{display:none;animation:fadein .4s ease both}
 #result.show{display:block}
+.back-btn{background:none;border:1px solid rgba(0,212,255,0.2);border-radius:4px;
+  color:rgba(0,212,255,0.48);font-family:'Orbitron',monospace;font-size:9px;cursor:pointer;
+  margin-bottom:22px;display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;letter-spacing:.12em;text-transform:uppercase;transition:all .2s}
+.back-btn:hover{border-color:var(--blue);color:var(--blue);box-shadow:0 0 12px rgba(0,212,255,0.18)}
 
-.back-btn{background:none;border:none;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;margin-bottom:28px;display:flex;align-items:center;gap:6px;padding:0;letter-spacing:.1em;text-transform:uppercase}
-.back-btn:hover{color:rgba(255,255,255,.6)}
+.dec-type{display:inline-block;font-family:'Orbitron',monospace;font-size:9px;
+  text-transform:uppercase;letter-spacing:.2em;padding:4px 12px;border-radius:2px;margin-bottom:12px}
+.dec-quote{font-size:clamp(13px,2.5vw,16px);color:rgba(200,220,255,.48);font-style:italic;
+  font-weight:300;line-height:1.65;margin-bottom:10px;
+  border-left:2px solid var(--orange);padding-left:14px}
+.dec-essence{font-family:'Exo 2',sans-serif;font-size:clamp(15px,3vw,20px);font-weight:300;
+  color:var(--text);line-height:1.65;margin-bottom:28px}
 
-.decision-type{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.15em;padding:3px 10px;border-radius:20px;margin-bottom:12px}
-.decision-quote{font-size:clamp(14px,2.5vw,17px);color:rgba(255,255,255,.55);font-style:italic;line-height:1.6;margin-bottom:10px}
-.decision-essence{font-size:clamp(15px,3vw,21px);color:var(--text);line-height:1.65;margin-bottom:32px}
+.scale-title{font-family:'Orbitron',monospace;font-size:9px;color:rgba(0,212,255,0.38);
+  text-transform:uppercase;letter-spacing:.2em;margin-bottom:10px}
+.scale-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.scale-tab{padding:8px 16px;border-radius:3px;border:1px solid rgba(0,212,255,0.18);
+  cursor:pointer;font-family:'Orbitron',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;transition:all .2s;
+  background:rgba(0,212,255,0.04);color:rgba(200,220,255,0.38);
+  clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
 
-/* SCALE TABS */
-.scale-title{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px}
-.scale-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.scale-tab{padding:8px 16px;border-radius:20px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;transition:all .2s}
-
-/* PATH CARDS */
-.paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px}
+.paths{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:26px}
 @media(max-width:520px){.paths{grid-template-columns:1fr}}
-.path-card{background:rgba(255,255,255,.03);border-radius:16px;padding:20px 22px;min-height:120px}
-.path-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px}
-.path-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.15em;font-weight:700;margin-bottom:12px;display:flex;align-items:center}
-.path-text{font-size:14px;line-height:1.75;color:rgba(255,255,255,.8)}
+.path-card{background:rgba(0,12,35,0.75);border-radius:6px;padding:18px 20px;
+  border:1px solid rgba(0,212,255,0.09);position:relative;overflow:hidden}
+.path-label{font-family:'Orbitron',monospace;font-size:9px;text-transform:uppercase;
+  letter-spacing:.14em;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.path-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.path-text{font-size:14px;line-height:1.75;color:rgba(220,235,255,0.8);font-weight:300}
 
-/* TIMELINE */
-.timeline-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:22px 24px;margin-bottom:24px}
-.section-label{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:18px}
-.tl-item{display:flex;gap:14px;align-items:flex-start;margin-bottom:20px}
+.timeline-card{background:rgba(0,8,28,0.85);border:1px solid rgba(0,212,255,0.1);
+  border-radius:6px;padding:20px 22px;margin-bottom:18px;border-left:2px solid var(--blue)}
+.section-label{font-family:'Orbitron',monospace;font-size:9px;color:rgba(0,212,255,0.38);
+  text-transform:uppercase;letter-spacing:.2em;margin-bottom:16px}
+.tl-item{display:flex;gap:14px;align-items:flex-start;margin-bottom:17px}
 .tl-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
-.tl-dot{width:11px;height:11px;border-radius:50%;margin-top:4px}
-.tl-line{width:2px;height:36px;margin-top:3px}
-.tl-time{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
-.tl-text{font-size:14px;color:rgba(255,255,255,.75);line-height:1.65}
+.tl-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.tl-line{width:2px;height:30px;margin-top:3px}
+.tl-time{font-family:'Orbitron',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.tl-text{font-size:14px;color:rgba(220,235,255,.75);line-height:1.65;font-weight:300}
 
-/* PARADOX / PHILOSOPHY */
-.insight-card{border-radius:16px;padding:20px 22px;margin-bottom:18px}
-.insight-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px}
-.insight-text{font-size:15px;line-height:1.75;font-style:italic}
+.insight-card{border-radius:6px;padding:17px 20px;margin-bottom:13px}
+.insight-label{font-family:'Orbitron',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.18em;margin-bottom:8px}
+.insight-text{font-size:14px;line-height:1.78;font-weight:300;font-style:italic}
 
-/* QUESTION */
-.question-box{text-align:center;padding:28px 20px}
-.question-pre{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.2em;margin-bottom:14px}
-.question-text{font-size:clamp(15px,3vw,21px);color:var(--text);line-height:1.65;font-style:italic;max-width:560px;margin:0 auto 24px}
-.new-btn{background:linear-gradient(135deg,#a78bfa,#60a5fa);border:none;border-radius:12px;color:#0a0a12;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:12px 32px;cursor:pointer}
+.qbox{text-align:center;padding:30px 20px;background:rgba(0,8,28,0.7);
+  border:1px solid rgba(0,212,255,0.13);border-radius:6px;margin-top:6px;
+  background-image:linear-gradient(rgba(0,212,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.025) 1px,transparent 1px);
+  background-size:30px 30px}
+.q-pre{font-family:'Orbitron',monospace;font-size:9px;color:rgba(0,212,255,0.32);
+  text-transform:uppercase;letter-spacing:.25em;margin-bottom:14px}
+.q-text{font-size:clamp(15px,3vw,20px);font-weight:300;font-style:italic;color:var(--text);
+  line-height:1.65;max-width:560px;margin:0 auto 26px;text-shadow:0 0 20px rgba(0,212,255,0.18)}
+.new-btn{background:linear-gradient(135deg,var(--orange),#bb4400);border:none;border-radius:6px;
+  color:#fff;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;padding:13px 28px;cursor:pointer;
+  box-shadow:0 0 22px rgba(255,107,0,0.32);transition:all .2s;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+.new-btn:hover{box-shadow:0 0 38px rgba(255,107,0,0.55);transform:translateY(-1px)}
 
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.7;transform:scale(1.05)}}
+@keyframes fadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tagpulse{0%,100%{box-shadow:0 0 18px rgba(255,107,0,.18)}50%{box-shadow:0 0 30px rgba(255,107,0,.38)}}
+@keyframes shimmer{to{background-position:200% center}}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 </style>
 </head>
 <body>
-<div class="bg-orb o1"></div>
-<div class="bg-orb o2"></div>
-<div class="bg-orb o3"></div>
 <div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-scan"></div>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <span class="topbar-icon">🧠</span>
+    <div>
+      <div class="topbar-title">Simulador de Decisiones Vitales</div>
+      <div class="topbar-sub">Cada elección reescribe el futuro · Powered by Claude AI</div>
+    </div>
+  </div>
+</div>
 
 <div class="wrap">
 
-  <!-- API KEY -->
   <div class="apibox" id="apibox">
     <div class="api-label">🔑 API Key de Anthropic</div>
     <div class="api-row">
-      <input class="api-input" type="password" id="apikey" placeholder="sk-ant-api03-..." />
+      <input class="api-input" type="password" id="apikey" placeholder="sk-ant-api03-..."/>
       <button class="api-btn" onclick="saveKey()">Guardar</button>
     </div>
-    <div class="api-ok" id="apiok">✓ API Key guardada — listo para simular</div>
-    <div class="api-hint">Obtenla en <strong style="color:#60a5fa">console.anthropic.com</strong> → API Keys · Se guarda solo en tu navegador.</div>
+    <div class="api-ok" id="apiok">✓ SISTEMA ACTIVADO — LISTO PARA SIMULAR</div>
+    <div class="api-hint">Obtenla en <strong style="color:var(--blue)">console.anthropic.com</strong> → API Keys · Solo se guarda en tu navegador.</div>
   </div>
 
-  <!-- HEADER -->
-  <header>
-    <div class="header-tag">◈ Simulador de Decisiones Vitales</div>
-    <h1>Cada decisión<br><em>reescribe el mundo</em></h1>
-    <p class="header-sub">Desde qué comer hasta cómo cambiar la historia.<br>Ninguna decisión es pequeña. Ninguna es definitiva.</p>
-  </header>
+  <div class="hero">
+    <div class="hero-tag">◈ Motor de Simulación de Decisiones · IA</div>
+    <h1>
+      <span class="l1">Cada decisión</span>
+      <span class="l2">REESCRIBE EL MUNDO</span>
+    </h1>
+    <p class="hero-sub">Desde qué comer hasta cómo cambiar la historia.<br>Ninguna decisión es pequeña. Ninguna es definitiva.</p>
+  </div>
 
-  <!-- INPUT -->
   <div id="inputSection">
     <div class="input-card">
+      <div class="corner c-tl"></div><div class="corner c-tr"></div>
+      <div class="corner c-bl"></div><div class="corner c-br"></div>
       <div class="input-label">¿Qué decisión estás considerando?</div>
       <textarea id="decisionInput" rows="4" placeholder="Describe tu decisión... puede ser algo cotidiano o algo que cambie tu vida para siempre."></textarea>
       <div class="input-footer">
-        <span class="hint-key">Ctrl+Enter para simular</span>
-        <button class="sim-btn" id="simBtn" onclick="simulate()">Simular →</button>
+        <span class="hint-key">CTRL+ENTER PARA SIMULAR</span>
+        <button class="sim-btn" id="simBtn" onclick="simulate()">▶ SIMULAR</button>
       </div>
     </div>
     <div class="error" id="error"></div>
-    <div class="examples-title">O prueba con uno de estos ejemplos</div>
+    <div class="ex-title">◈ O selecciona un escenario de ejemplo</div>
     <div class="examples" id="examples"></div>
   </div>
 
-  <!-- RESULT -->
   <div id="result">
-    <button class="back-btn" onclick="goBack()">← Nueva decisión</button>
+    <button class="back-btn" onclick="goBack()">◀ NUEVA DECISIÓN</button>
     <div id="resultContent"></div>
   </div>
 
 </div>
-
 <script>
-const EXAMPLES = [
-  "Renunciar a mi trabajo estable para montar mi propio negocio",
-  "Decirle la verdad a alguien aunque le duela",
-  "Quedarme en mi ciudad o emigrar a otro país",
-  "Tener hijos ahora o esperar unos años más",
-  "Perdonar a alguien que me hizo daño profundo",
-  "Aceptar un acuerdo de paz que requiere concesiones dolorosas",
-  "Comer sano hoy aunque lo que quiero es pizza",
-  "Hablar en público sobre algo que creo aunque nadie me apoye",
-];
+const EXAMPLES=["Renunciar a mi trabajo estable para montar mi propio negocio","Decirle la verdad a alguien aunque le duela","Quedarme en mi ciudad o emigrar a otro país","Tener hijos ahora o esperar unos años más","Perdonar a alguien que me hizo daño profundo","Aceptar un acuerdo de paz que requiere concesiones dolorosas","Comer sano hoy aunque lo que quiero es pizza","Hablar en público sobre algo que creo aunque nadie me apoye"];
+const SCALE_KEYS=["individual","familiar","social","global"];
+const SCALE_LABELS=["Individual","Familiar","Social","Global"];
+const SCALE_COLORS=["#00d4ff","#ff6b00","#00ffea","#ffe500"];
+const TL_COLORS=["#00d4ff","#ff6b00","#00ffea","#ffe500","#ff6bff"];
+const TYPE_COLORS={simple:"#00ffea",compleja:"#ff6b00",trascendental:"#ff6bff"};
+let currentResult=null,activeScale=0;
 
-const SCALE_KEYS  = ["individual","familiar","social","global"];
-const SCALE_LABELS = ["Individual","Familiar","Social","Global"];
-const SCALE_COLORS = ["#a78bfa","#60a5fa","#34d399","#fbbf24"];
-const TL_COLORS = ["#a78bfa","#60a5fa","#34d399","#fbbf24","#f472b6"];
-const TYPE_COLORS = {simple:"#34d399",compleja:"#60a5fa",trascendental:"#f472b6"};
-
-let currentResult = null;
-let activeScale = 0;
-
-// ── API KEY ───────────────────────────────────────────
 function saveKey(){
-  const k = document.getElementById('apikey').value.trim();
-  if(!k || !k.startsWith('sk-')){ showError('La key debe empezar con "sk-"'); return; }
-  localStorage.setItem('anthropic_key', k);
+  const k=document.getElementById('apikey').value.trim();
+  if(!k||!k.startsWith('sk-')){showError('La key debe empezar con "sk-"');return}
+  localStorage.setItem('anthropic_key',k);
   document.getElementById('apiok').classList.add('show');
   document.getElementById('apibox').classList.add('ok');
   hideError();
 }
-function getKey(){ return localStorage.getItem('anthropic_key') || ''; }
-window.addEventListener('load', () => {
-  const k = getKey();
-  if(k){ document.getElementById('apikey').value = k; document.getElementById('apiok').classList.add('show'); document.getElementById('apibox').classList.add('ok'); }
-  // Build examples
-  const ex = document.getElementById('examples');
-  EXAMPLES.forEach(e => {
-    const b = document.createElement('button');
-    b.className = 'ex-btn';
-    b.textContent = e;
-    b.onclick = () => { document.getElementById('decisionInput').value = e; };
-    ex.appendChild(b);
-  });
+function getKey(){return localStorage.getItem('anthropic_key')||''}
+window.addEventListener('load',()=>{
+  const k=getKey();
+  if(k){document.getElementById('apikey').value=k;document.getElementById('apiok').classList.add('show');document.getElementById('apibox').classList.add('ok')}
+  const ex=document.getElementById('examples');
+  EXAMPLES.forEach(e=>{const b=document.createElement('button');b.className='ex-btn';b.textContent=e;b.onclick=()=>{document.getElementById('decisionInput').value=e};ex.appendChild(b)});
 });
-
-// ── Errors ────────────────────────────────────────────
-function showError(msg){ const e=document.getElementById('error'); e.textContent=msg; e.classList.add('show'); }
-function hideError(){ document.getElementById('error').classList.remove('show'); }
-
-// ── Navigation ────────────────────────────────────────
+function showError(msg){const e=document.getElementById('error');e.textContent=msg;e.classList.add('show')}
+function hideError(){document.getElementById('error').classList.remove('show')}
 function goBack(){
   document.getElementById('result').classList.remove('show');
   document.getElementById('result').style.display='none';
   document.getElementById('inputSection').style.display='block';
   document.getElementById('decisionInput').value='';
   document.getElementById('resultContent').innerHTML='';
-  hideError();
-  currentResult = null;
-  activeScale = 0;
+  hideError();currentResult=null;activeScale=0;
 }
-
-// ── Simulate ──────────────────────────────────────────
 async function simulate(){
-  const decision = document.getElementById('decisionInput').value.trim();
-  if(!decision){ showError('Escribe una decisión primero.'); return; }
-  const key = getKey();
-  if(!key){ showError('Ingresa tu API Key de Anthropic primero.'); return; }
-
-  const btn = document.getElementById('simBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div>Simulando...';
+  const decision=document.getElementById('decisionInput').value.trim();
+  if(!decision){showError('INGRESA UNA DECISIÓN PRIMERO');return}
+  const key=getKey();
+  if(!key){showError('INGRESA TU API KEY PRIMERO');return}
+  const btn=document.getElementById('simBtn');
+  btn.disabled=true;btn.innerHTML='<div class="spinner"></div> PROCESANDO...';
   hideError();
-
-  const prompt = `Eres un simulador filosófico de decisiones vitales. Decisión: "${decision}"
-
-Responde ÚNICAMENTE con JSON válido sin markdown ni texto extra. Sé muy conciso, máximo 1 oración por campo:
-{"decision_type":"simple|compleja|trascendental","essence":"1 frase poética.","scales":{"individual":{"si":{"label":"Si lo haces","text":"1 oración."},"no":{"label":"Si no lo haces","text":"1 oración."}},"familiar":{"si":{"label":"Si lo haces","text":"1 oración."},"no":{"label":"Si no lo haces","text":"1 oración."}},"social":{"si":{"label":"Si lo haces","text":"1 oración."},"no":{"label":"Si no lo haces","text":"1 oración."}},"global":{"si":{"label":"Si lo haces","text":"1 oración."},"no":{"label":"Si no lo haces","text":"1 oración."}}},"timeline":[{"time":"Próximas horas","text":"1 oración."},{"time":"Próximos meses","text":"1 oración."},{"time":"Próximos años","text":"1 oración."},{"time":"En décadas","text":"1 oración."},{"time":"Tu legado","text":"1 oración."}],"paradox":"1 oración.","philosophy":"1 oración sin juicio moral.","question":"1 pregunta socrática breve."}`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
-    });
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error?.message || 'Error API');
-    const raw = data.content?.map(c => c.text||'').join('') || '';
-    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
-    currentResult = parsed;
-    currentResult._decision = decision;
-    activeScale = 0;
-    renderResult();
-  } catch(e) {
-    showError('Error: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = 'Simular →';
-  }
+  const prompt=`Eres un simulador filosófico de decisiones vitales. Decisión: "${decision}"\n\nResponde ÚNICAMENTE con JSON válido sin markdown ni texto extra. Sé muy conciso, máximo 1 oración por campo:\n{"decision_type":"simple|compleja|trascendental","essence":"1 frase poética.","scales":{"individual":{"si":{"label":"Si lo haces","text":"1 oración."},"no":{"label":"Si no lo haces","text":"1 oración."}},"familiar":{"si":{"label":"Si lo haces","text":"1 oración."},"no":{"label":"Si no lo haces","text":"1 oración."}},"social":{"si":{"label":"Si lo haces","text":"1 oración."},"no":{"label":"Si no lo haces","text":"1 oración."}},"global":{"si":{"label":"Si lo haces","text":"1 oración."},"no":{"label":"Si no lo haces","text":"1 oración."}}},"timeline":[{"time":"Próximas horas","text":"1 oración."},{"time":"Próximos meses","text":"1 oración."},{"time":"Próximos años","text":"1 oración."},{"time":"En décadas","text":"1 oración."},{"time":"Tu legado","text":"1 oración."}],"paradox":"1 oración.","philosophy":"1 oración sin juicio moral.","question":"1 pregunta socrática breve."}`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error?.message||'Error API');
+    const raw=data.content?.map(c=>c.text||'').join('')||'';
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    currentResult=parsed;currentResult._decision=decision;activeScale=0;renderResult();
+  }catch(e){showError('ERROR: '+e.message)}
+  finally{btn.disabled=false;btn.innerHTML='▶ SIMULAR'}
 }
-
-// ── Render Result ─────────────────────────────────────
 function renderResult(){
-  const r = currentResult;
-  const tc = TYPE_COLORS[r.decision_type] || '#a78bfa';
-
-  let html = `
-    <div>
-      <span class="decision-type" style="background:${tc}22;color:${tc};border:1px solid ${tc}44">Decisión ${r.decision_type}</span>
-    </div>
-    <div class="decision-quote">"${esc(r._decision)}"</div>
-    <div class="decision-essence">${esc(r.essence)}</div>
-
-    <div class="scale-title">Escala de impacto</div>
-    <div class="scale-tabs">
-      ${SCALE_LABELS.map((l,i) => `
-        <button class="scale-tab" id="stab${i}" onclick="setScale(${i})"
-          style="background:${i===activeScale?SCALE_COLORS[i]:'rgba(255,255,255,0.05)'};color:${i===activeScale?'#0a0a12':'rgba(255,255,255,0.5)'};box-shadow:${i===activeScale?`0 0 20px ${SCALE_COLORS[i]}55`:'none'}">
-          ${l}
-        </button>`).join('')}
-    </div>
-
+  const r=currentResult;
+  const tc=TYPE_COLORS[r.decision_type]||'#00d4ff';
+  let html=`
+    <div><span class="dec-type" style="background:${tc}18;color:${tc};border:1px solid ${tc}44">◈ DECISIÓN ${(r.decision_type||'').toUpperCase()}</span></div>
+    <div class="dec-quote">"${esc(r._decision)}"</div>
+    <div class="dec-essence">${esc(r.essence)}</div>
+    <div class="scale-title">▶ ESCALA DE IMPACTO</div>
+    <div class="scale-tabs">${SCALE_LABELS.map((l,i)=>`
+      <button class="scale-tab" id="stab${i}" onclick="setScale(${i})"
+        style="background:${i===activeScale?SCALE_COLORS[i]+'22':'rgba(0,212,255,0.04)'};color:${i===activeScale?SCALE_COLORS[i]:'rgba(200,220,255,0.38)'};border-color:${i===activeScale?SCALE_COLORS[i]+'55':'rgba(0,212,255,0.18)'};box-shadow:${i===activeScale?`0 0 14px ${SCALE_COLORS[i]}33`:''}">
+        ${l}</button>`).join('')}</div>
     <div class="paths" id="paths">${renderPaths()}</div>
-
     <div class="timeline-card">
-      <div class="section-label">◎ Línea del tiempo si lo haces</div>
-      ${r.timeline.map((t,i) => `
+      <div class="section-label">◎ LÍNEA TEMPORAL — SI LO HACES</div>
+      ${r.timeline.map((t,i)=>`
         <div class="tl-item">
           <div class="tl-left">
             <div class="tl-dot" style="background:${TL_COLORS[i]};box-shadow:0 0 8px ${TL_COLORS[i]}"></div>
-            ${i < r.timeline.length-1 ? `<div class="tl-line" style="background:linear-gradient(${TL_COLORS[i]}88,transparent)"></div>` : ''}
+            ${i<r.timeline.length-1?`<div class="tl-line" style="background:linear-gradient(${TL_COLORS[i]}55,transparent)"></div>`:''}
           </div>
-          <div>
-            <div class="tl-time" style="color:${TL_COLORS[i]}">${esc(t.time)}</div>
-            <div class="tl-text">${esc(t.text)}</div>
-          </div>
+          <div><div class="tl-time" style="color:${TL_COLORS[i]}">${esc(t.time)}</div>
+          <div class="tl-text">${esc(t.text)}</div></div>
         </div>`).join('')}
     </div>
-
-    <div class="insight-card" style="background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.15)">
-      <div class="insight-label" style="color:#f472b6">◈ La paradoja oculta</div>
-      <div class="insight-text" style="color:rgba(255,255,255,.75)">${esc(r.paradox)}</div>
+    <div class="insight-card" style="background:rgba(255,107,255,0.04);border:1px solid rgba(255,107,255,0.18);border-left:2px solid #ff6bff">
+      <div class="insight-label" style="color:#ff6bff">◈ PARADOJA OCULTA</div>
+      <div class="insight-text" style="color:rgba(230,210,255,0.82)">${esc(r.paradox)}</div>
     </div>
-
-    <div class="insight-card" style="background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.15)">
-      <div class="insight-label" style="color:#a78bfa">◈ Reflexión filosófica</div>
-      <div class="insight-text" style="color:rgba(255,255,255,.75)">${esc(r.philosophy)}</div>
+    <div class="insight-card" style="background:rgba(0,212,255,0.03);border:1px solid rgba(0,212,255,0.14);border-left:2px solid var(--blue)">
+      <div class="insight-label" style="color:var(--blue)">◈ REFLEXIÓN FILOSÓFICA</div>
+      <div class="insight-text" style="color:rgba(200,230,255,0.82)">${esc(r.philosophy)}</div>
     </div>
-
-    <div class="question-box">
-      <div class="question-pre">Antes de decidir, pregúntate</div>
-      <div class="question-text">"${esc(r.question)}"</div>
-      <button class="new-btn" onclick="goBack()">Simular otra decisión →</button>
-    </div>
-  `;
-
-  document.getElementById('resultContent').innerHTML = html;
-  document.getElementById('inputSection').style.display = 'none';
+    <div class="qbox">
+      <div class="q-pre">◈ ANTES DE DECIDIR, PREGÚNTATE</div>
+      <div class="q-text">"${esc(r.question)}"</div>
+      <button class="new-btn" onclick="goBack()">▶ SIMULAR OTRA DECISIÓN</button>
+    </div>`;
+  document.getElementById('resultContent').innerHTML=html;
+  document.getElementById('inputSection').style.display='none';
   document.getElementById('result').classList.add('show');
-  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-
 function renderPaths(){
-  const r = currentResult;
-  const key = SCALE_KEYS[activeScale];
-  const scale = r.scales[key];
-  const color = SCALE_COLORS[activeScale];
+  const r=currentResult,key=SCALE_KEYS[activeScale],scale=r.scales[key],color=SCALE_COLORS[activeScale];
   return `
-    <div class="path-card" style="border:1px solid ${color}33;box-shadow:0 0 30px ${color}11">
+    <div class="path-card" style="border-color:${color}30;border-top:2px solid ${color}">
       <div class="path-label" style="color:${color}">
-        <span class="path-dot" style="background:${color};box-shadow:0 0 8px ${color}"></span>
-        ${esc(scale.si.label)}
-      </div>
-      <div class="path-text">${esc(scale.si.text)}</div>
+        <span class="path-dot" style="background:${color};box-shadow:0 0 8px ${color}"></span>${esc(scale.si.label)}
+      </div><div class="path-text">${esc(scale.si.text)}</div>
     </div>
-    <div class="path-card" style="border:1px solid rgba(255,255,255,.1)">
-      <div class="path-label" style="color:rgba(255,255,255,0.45)">
-        <span class="path-dot" style="background:rgba(255,255,255,0.3)"></span>
-        ${esc(scale.no.label)}
-      </div>
-      <div class="path-text">${esc(scale.no.text)}</div>
+    <div class="path-card" style="border-color:rgba(255,255,255,0.07);border-top:2px solid rgba(255,255,255,0.14)">
+      <div class="path-label" style="color:rgba(200,220,255,0.38)">
+        <span class="path-dot" style="background:rgba(200,220,255,0.22)"></span>${esc(scale.no.label)}
+      </div><div class="path-text">${esc(scale.no.text)}</div>
     </div>`;
 }
-
 function setScale(i){
-  activeScale = i;
-  // Update tabs
-  SCALE_LABELS.forEach((_,idx) => {
-    const tab = document.getElementById('stab'+idx);
-    if(!tab) return;
-    tab.style.background = idx===i ? SCALE_COLORS[idx] : 'rgba(255,255,255,0.05)';
-    tab.style.color = idx===i ? '#0a0a12' : 'rgba(255,255,255,0.5)';
-    tab.style.boxShadow = idx===i ? `0 0 20px ${SCALE_COLORS[idx]}55` : 'none';
+  activeScale=i;
+  SCALE_LABELS.forEach((_,idx)=>{
+    const tab=document.getElementById('stab'+idx);if(!tab)return;
+    tab.style.background=idx===i?SCALE_COLORS[idx]+'22':'rgba(0,212,255,0.04)';
+    tab.style.color=idx===i?SCALE_COLORS[idx]:'rgba(200,220,255,0.38)';
+    tab.style.borderColor=idx===i?SCALE_COLORS[idx]+'55':'rgba(0,212,255,0.18)';
+    tab.style.boxShadow=idx===i?`0 0 14px ${SCALE_COLORS[idx]}33`:'';
   });
-  // Update paths
-  document.getElementById('paths').innerHTML = renderPaths();
+  document.getElementById('paths').innerHTML=renderPaths();
 }
-
 function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-
-// Keyboard shortcut
-document.addEventListener('keydown', e => {
-  if((e.ctrlKey||e.metaKey) && e.key==='Enter'){
-    const inp = document.getElementById('decisionInput');
-    if(document.activeElement === inp || document.getElementById('inputSection').style.display !== 'none') simulate();
-  }
-});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')simulate()});
 </script>
 </body>
 </html>
