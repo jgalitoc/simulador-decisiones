@@ -212,7 +212,11 @@ function goBack(){
   document.getElementById('result').classList.remove('show');
   document.getElementById('result').style.display='none';
   document.getElementById('inputSection').style.display='block';
+  document.getElementById('decisionInput').value='';
+  document.getElementById('resultContent').innerHTML='';
+  hideError();
   currentResult = null;
+  activeScale = 0;
 }
 
 // ── Simulate ──────────────────────────────────────────
