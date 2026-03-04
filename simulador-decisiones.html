@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Decisiones Vitales</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a12;--card:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.08);--accent:#a78bfa;--accent2:#60a5fa;--accent3:#34d399;--accent4:#fbbf24;--text:#e8e8f0;--muted:rgba(255,255,255,0.35)}
+html,body{min-height:100%;overflow-x:hidden}
+body{font-family:'Playfair Display',Georgia,serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center}
+.bg-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+.o1{top:8%;left:4%;width:420px;height:420px;background:radial-gradient(circle,rgba(167,139,250,.06) 0%,transparent 70%);animation:pulse 8s ease infinite}
+.o2{bottom:12%;right:6%;width:360px;height:360px;background:radial-gradient(circle,rgba(96,165,250,.05) 0%,transparent 70%);animation:pulse 10s ease infinite 2s}
+.o3{top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(244,114,182,.03) 0%,transparent 70%);animation:pulse 12s ease infinite 4s}
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:60px 60px}
+.wrap{position:relative;z-index:1;width:100%;max-width:820px;padding:36px 18px 80px}
+
+/* API KEY */
+.apibox{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:16px;padding:18px 20px;margin-bottom:28px}
+.apibox.ok{border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.05)}
+.api-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px}
+.api-row{display:flex;gap:8px}
+.api-input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:10px 14px;outline:none;transition:border-color .2s}
+.api-input:focus{border-color:var(--accent)}
+.api-btn{background:linear-gradient(135deg,#a78bfa,#60a5fa);border:none;color:#0a0a12;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.api-ok{font-family:'DM Mono',monospace;font-size:11px;color:#34d399;margin-top:8px;display:none}
+.api-ok.show{display:block}
+.api-hint{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.3);margin-top:8px;line-height:1.6}
+
+/* HEADER */
+header{text-align:center;margin-bottom:44px}
+.header-tag{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.3em;margin-bottom:18px;opacity:.8}
+h1{font-size:clamp(30px,6vw,54px);font-weight:400;line-height:1.15;margin:0 0 16px;color:#f0f0fa}
+h1 em{color:var(--accent);font-style:italic}
+.header-sub{font-family:'DM Mono',monospace;font-size:13px;color:rgba(255,255,255,.4);line-height:1.8;max-width:480px;margin:0 auto}
+
+/* INPUT SECTION */
+.input-card{background:var(--card);border:1px solid rgba(167,139,250,.2);border-radius:20px;padding:26px;margin-bottom:18px;box-shadow:0 0 60px rgba(167,139,250,.05)}
+.input-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px}
+#decisionInput{width:100%;background:transparent;border:none;color:var(--text);font-size:16px;line-height:1.7;font-family:'Playfair Display',serif;resize:none;outline:none;min-height:100px}
+#decisionInput::placeholder{color:rgba(255,255,255,.25)}
+.input-footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:10px}
+.hint-key{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.2)}
+.sim-btn{background:linear-gradient(135deg,#a78bfa,#60a5fa);border:none;border-radius:12px;color:#0a0a12;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:12px 28px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:opacity .2s}
+.sim-btn:disabled{opacity:.4;cursor:not-allowed}
+.spinner{width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#0a0a12;border-radius:50%;animation:spin .7s linear infinite}
+
+/* EXAMPLES */
+.examples-title{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px;text-align:center}
+.examples{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:32px}
+.ex-btn{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;color:rgba(255,255,255,.55);font-family:'DM Mono',monospace;font-size:11px;padding:7px 14px;cursor:pointer;transition:all .2s;line-height:1.4}
+.ex-btn:hover{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.3);color:var(--accent)}
+
+/* ERROR */
+.error{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:12px;padding:12px 16px;color:#fca5a5;font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px;display:none}
+.error.show{display:block}
+
+/* RESULT */
+#result{display:none;animation:fadeIn .5s ease both}
+#result.show{display:block}
+
+.back-btn{background:none;border:none;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;margin-bottom:28px;display:flex;align-items:center;gap:6px;padding:0;letter-spacing:.1em;text-transform:uppercase}
+.back-btn:hover{color:rgba(255,255,255,.6)}
+
+.decision-type{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.15em;padding:3px 10px;border-radius:20px;margin-bottom:12px}
+.decision-quote{font-size:clamp(14px,2.5vw,17px);color:rgba(255,255,255,.55);font-style:italic;line-height:1.6;margin-bottom:10px}
+.decision-essence{font-size:clamp(15px,3vw,21px);color:var(--text);line-height:1.65;margin-bottom:32px}
+
+/* SCALE TABS */
+.scale-title{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px}
+.scale-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.scale-tab{padding:8px 16px;border-radius:20px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;transition:all .2s}
+
+/* PATH CARDS */
+.paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px}
+@media(max-width:520px){.paths{grid-template-columns:1fr}}
+.path-card{background:rgba(255,255,255,.03);border-radius:16px;padding:20px 22px;min-height:120px}
+.path-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px}
+.path-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.15em;font-weight:700;margin-bottom:12px;display:flex;align-items:center}
+.path-text{font-size:14px;line-height:1.75;color:rgba(255,255,255,.8)}
+
+/* TIMELINE */
+.timeline-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:22px 24px;margin-bottom:24px}
+.section-label{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:18px}
+.tl-item{display:flex;gap:14px;align-items:flex-start;margin-bottom:20px}
+.tl-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.tl-dot{width:11px;height:11px;border-radius:50%;margin-top:4px}
+.tl-line{width:2px;height:36px;margin-top:3px}
+.tl-time{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+.tl-text{font-size:14px;color:rgba(255,255,255,.75);line-height:1.65}
+
+/* PARADOX / PHILOSOPHY */
+.insight-card{border-radius:16px;padding:20px 22px;margin-bottom:18px}
+.insight-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px}
+.insight-text{font-size:15px;line-height:1.75;font-style:italic}
+
+/* QUESTION */
+.question-box{text-align:center;padding:28px 20px}
+.question-pre{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.2em;margin-bottom:14px}
+.question-text{font-size:clamp(15px,3vw,21px);color:var(--text);line-height:1.65;font-style:italic;max-width:560px;margin:0 auto 24px}
+.new-btn{background:linear-gradient(135deg,#a78bfa,#60a5fa);border:none;border-radius:12px;color:#0a0a12;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:12px 32px;cursor:pointer}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.7;transform:scale(1.05)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+</style>
+</head>
+<body>
+<div class="bg-orb o1"></div>
+<div class="bg-orb o2"></div>
+<div class="bg-orb o3"></div>
+<div class="bg-grid"></div>
+
+<div class="wrap">
+
+  <!-- API KEY -->
+  <div class="apibox" id="apibox">
+    <div class="api-label">🔑 API Key de Anthropic</div>
+    <div class="api-row">
+      <input class="api-input" type="password" id="apikey" placeholder="sk-ant-api03-..." />
+      <button class="api-btn" onclick="saveKey()">Guardar</button>
+    </div>
+    <div class="api-ok" id="apiok">✓ API Key guardada — listo para simular</div>
+    <div class="api-hint">Obtenla en <strong style="color:#60a5fa">console.anthropic.com</strong> → API Keys · Se guarda solo en tu navegador.</div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-tag">◈ Simulador de Decisiones Vitales</div>
+    <h1>Cada decisión<br><em>reescribe el mundo</em></h1>
+    <p class="header-sub">Desde qué comer hasta cómo cambiar la historia.<br>Ninguna decisión es pequeña. Ninguna es definitiva.</p>
+  </header>
+
+  <!-- INPUT -->
+  <div id="inputSection">
+    <div class="input-card">
+      <div class="input-label">¿Qué decisión estás considerando?</div>
+      <textarea id="decisionInput" rows="4" placeholder="Describe tu decisión... puede ser algo cotidiano o algo que cambie tu vida para siempre."></textarea>
+      <div class="input-footer">
+        <span class="hint-key">Ctrl+Enter para simular</span>
+        <button class="sim-btn" id="simBtn" onclick="simulate()">Simular →</button>
+      </div>
+    </div>
+    <div class="error" id="error"></div>
+    <div class="examples-title">O prueba con uno de estos ejemplos</div>
+    <div class="examples" id="examples"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result">
+    <button class="back-btn" onclick="goBack()">← Nueva decisión</button>
+    <div id="resultContent"></div>
+  </div>
+
+</div>
+
+<script>
+const EXAMPLES = [
+  "Renunciar a mi trabajo estable para montar mi propio negocio",
+  "Decirle la verdad a alguien aunque le duela",
+  "Quedarme en mi ciudad o emigrar a otro país",
+  "Tener hijos ahora o esperar unos años más",
+  "Perdonar a alguien que me hizo daño profundo",
+  "Aceptar un acuerdo de paz que requiere concesiones dolorosas",
+  "Comer sano hoy aunque lo que quiero es pizza",
+  "Hablar en público sobre algo que creo aunque nadie me apoye",
+];
+
+const SCALE_KEYS  = ["individual","familiar","social","global"];
+const SCALE_LABELS = ["Individual","Familiar","Social","Global"];
+const SCALE_COLORS = ["#a78bfa","#60a5fa","#34d399","#fbbf24"];
+const TL_COLORS = ["#a78bfa","#60a5fa","#34d399","#fbbf24","#f472b6"];
+const TYPE_COLORS = {simple:"#34d399",compleja:"#60a5fa",trascendental:"#f472b6"};
+
+let currentResult = null;
+let activeScale = 0;
+
+// ── API KEY ───────────────────────────────────────────
+function saveKey(){
+  const k = document.getElementById('apikey').value.trim();
+  if(!k || !k.startsWith('sk-')){ showError('La key debe empezar con "sk-"'); return; }
+  localStorage.setItem('anthropic_key', k);
+  document.getElementById('apiok').classList.add('show');
+  document.getElementById('apibox').classList.add('ok');
+  hideError();
+}
+function getKey(){ return localStorage.getItem('anthropic_key') || ''; }
+window.addEventListener('load', () => {
+  const k = getKey();
+  if(k){ document.getElementById('apikey').value = k; document.getElementById('apiok').classList.add('show'); document.getElementById('apibox').classList.add('ok'); }
+  // Build examples
+  const ex = document.getElementById('examples');
+  EXAMPLES.forEach(e => {
+    const b = document.createElement('button');
+    b.className = 'ex-btn';
+    b.textContent = e;
+    b.onclick = () => { document.getElementById('decisionInput').value = e; };
+    ex.appendChild(b);
+  });
+});
+
+// ── Errors ────────────────────────────────────────────
+function showError(msg){ const e=document.getElementById('error'); e.textContent=msg; e.classList.add('show'); }
+function hideError(){ document.getElementById('error').classList.remove('show'); }
+
+// ── Navigation ────────────────────────────────────────
+function goBack(){
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('result').style.display='none';
+  document.getElementById('inputSection').style.display='block';
+  currentResult = null;
+}
+
+// ── Simulate ──────────────────────────────────────────
+async function simulate(){
+  const decision = document.getElementById('decisionInput').value.trim();
+  if(!decision){ showError('Escribe una decisión primero.'); return; }
+  const key = getKey();
+  if(!key){ showError('Ingresa tu API Key de Anthropic primero.'); return; }
+
+  const btn = document.getElementById('simBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>Simulando...';
+  hideError();
+
+  const prompt = `Eres un simulador filosófico de decisiones vitales. Decisión: "${decision}"
+
+Responde ÚNICAMENTE con JSON válido sin markdown ni texto extra:
+{"decision_type":"simple|compleja|trascendental","essence":"Frase poética de 1-2 oraciones que captura la esencia.","scales":{"individual":{"si":{"label":"Si lo haces","text":"2 oraciones sobre consecuencias personales y emocionales."},"no":{"label":"Si no lo haces","text":"2 oraciones sobre consecuencias personales y emocionales."}},"familiar":{"si":{"label":"Si lo haces","text":"2 oraciones sobre impacto en familia y relaciones."},"no":{"label":"Si no lo haces","text":"2 oraciones sobre impacto en familia y relaciones."}},"social":{"si":{"label":"Si lo haces","text":"2 oraciones sobre efecto en comunidad y sociedad."},"no":{"label":"Si no lo haces","text":"2 oraciones sobre efecto en comunidad y sociedad."}},"global":{"si":{"label":"Si lo haces","text":"2 oraciones sobre impacto global y humanidad."},"no":{"label":"Si no lo haces","text":"2 oraciones sobre impacto global y humanidad."}}},"timeline":[{"time":"Próximas horas","text":"1 oración."},{"time":"Próximos meses","text":"1 oración."},{"time":"Próximos años","text":"1 oración."},{"time":"En décadas","text":"1 oración."},{"time":"Tu legado","text":"1 oración."}],"paradox":"2 oraciones sobre la paradoja oculta.","philosophy":"2 oraciones de reflexión filosófica sin juicio moral.","question":"Una pregunta socrática breve."}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error?.message || 'Error API');
+    const raw = data.content?.map(c => c.text||'').join('') || '';
+    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    currentResult = parsed;
+    currentResult._decision = decision;
+    activeScale = 0;
+    renderResult();
+  } catch(e) {
+    showError('Error: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Simular →';
+  }
+}
+
+// ── Render Result ─────────────────────────────────────
+function renderResult(){
+  const r = currentResult;
+  const tc = TYPE_COLORS[r.decision_type] || '#a78bfa';
+
+  let html = `
+    <div>
+      <span class="decision-type" style="background:${tc}22;color:${tc};border:1px solid ${tc}44">Decisión ${r.decision_type}</span>
+    </div>
+    <div class="decision-quote">"${esc(r._decision)}"</div>
+    <div class="decision-essence">${esc(r.essence)}</div>
+
+    <div class="scale-title">Escala de impacto</div>
+    <div class="scale-tabs">
+      ${SCALE_LABELS.map((l,i) => `
+        <button class="scale-tab" id="stab${i}" onclick="setScale(${i})"
+          style="background:${i===activeScale?SCALE_COLORS[i]:'rgba(255,255,255,0.05)'};color:${i===activeScale?'#0a0a12':'rgba(255,255,255,0.5)'};box-shadow:${i===activeScale?`0 0 20px ${SCALE_COLORS[i]}55`:'none'}">
+          ${l}
+        </button>`).join('')}
+    </div>
+
+    <div class="paths" id="paths">${renderPaths()}</div>
+
+    <div class="timeline-card">
+      <div class="section-label">◎ Línea del tiempo si lo haces</div>
+      ${r.timeline.map((t,i) => `
+        <div class="tl-item">
+          <div class="tl-left">
+            <div class="tl-dot" style="background:${TL_COLORS[i]};box-shadow:0 0 8px ${TL_COLORS[i]}"></div>
+            ${i < r.timeline.length-1 ? `<div class="tl-line" style="background:linear-gradient(${TL_COLORS[i]}88,transparent)"></div>` : ''}
+          </div>
+          <div>
+            <div class="tl-time" style="color:${TL_COLORS[i]}">${esc(t.time)}</div>
+            <div class="tl-text">${esc(t.text)}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <div class="insight-card" style="background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.15)">
+      <div class="insight-label" style="color:#f472b6">◈ La paradoja oculta</div>
+      <div class="insight-text" style="color:rgba(255,255,255,.75)">${esc(r.paradox)}</div>
+    </div>
+
+    <div class="insight-card" style="background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.15)">
+      <div class="insight-label" style="color:#a78bfa">◈ Reflexión filosófica</div>
+      <div class="insight-text" style="color:rgba(255,255,255,.75)">${esc(r.philosophy)}</div>
+    </div>
+
+    <div class="question-box">
+      <div class="question-pre">Antes de decidir, pregúntate</div>
+      <div class="question-text">"${esc(r.question)}"</div>
+      <button class="new-btn" onclick="goBack()">Simular otra decisión →</button>
+    </div>
+  `;
+
+  document.getElementById('resultContent').innerHTML = html;
+  document.getElementById('inputSection').style.display = 'none';
+  document.getElementById('result').classList.add('show');
+  document.getElementById('result').style.display = 'block';
+}
+
+function renderPaths(){
+  const r = currentResult;
+  const key = SCALE_KEYS[activeScale];
+  const scale = r.scales[key];
+  const color = SCALE_COLORS[activeScale];
+  return `
+    <div class="path-card" style="border:1px solid ${color}33;box-shadow:0 0 30px ${color}11">
+      <div class="path-label" style="color:${color}">
+        <span class="path-dot" style="background:${color};box-shadow:0 0 8px ${color}"></span>
+        ${esc(scale.si.label)}
+      </div>
+      <div class="path-text">${esc(scale.si.text)}</div>
+    </div>
+    <div class="path-card" style="border:1px solid rgba(255,255,255,.1)">
+      <div class="path-label" style="color:rgba(255,255,255,0.45)">
+        <span class="path-dot" style="background:rgba(255,255,255,0.3)"></span>
+        ${esc(scale.no.label)}
+      </div>
+      <div class="path-text">${esc(scale.no.text)}</div>
+    </div>`;
+}
+
+function setScale(i){
+  activeScale = i;
+  // Update tabs
+  SCALE_LABELS.forEach((_,idx) => {
+    const tab = document.getElementById('stab'+idx);
+    if(!tab) return;
+    tab.style.background = idx===i ? SCALE_COLORS[idx] : 'rgba(255,255,255,0.05)';
+    tab.style.color = idx===i ? '#0a0a12' : 'rgba(255,255,255,0.5)';
+    tab.style.boxShadow = idx===i ? `0 0 20px ${SCALE_COLORS[idx]}55` : 'none';
+  });
+  // Update paths
+  document.getElementById('paths').innerHTML = renderPaths();
+}
+
+function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+  if((e.ctrlKey||e.metaKey) && e.key==='Enter'){
+    const inp = document.getElementById('decisionInput');
+    if(document.activeElement === inp || document.getElementById('inputSection').style.display !== 'none') simulate();
+  }
+});
+</script>
+</body>
+</html>
