@@ -591,7 +591,7 @@ footer {
       Analiza cualquier decisión —cotidiana o trascendental— y descubre sus consecuencias filosóficas, temporales y humanas.
     </p>
     <div class="hero-actions">
-      <button class="btn btn-primary" onclick="document.getElementById('decisionInput').focus(); document.getElementById('decisionInput').scrollIntoView({behavior:'smooth'})">
+      <button class="btn btn-primary" onclick="if(document.getElementById('result').classList.contains('show')){goBack()}else{document.getElementById('decisionInput').focus();document.getElementById('decisionInput').scrollIntoView({behavior:'smooth'})}">
         ▶ Nueva decisión
       </button>
       <button class="btn btn-secondary" onclick="openModal()">Ver ejemplos &rarr;</button>
