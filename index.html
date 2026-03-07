@@ -251,7 +251,8 @@ textarea {
   outline: none;
   line-height: 1.65;
   transition: border-color .2s, box-shadow .2s;
-  min-height: 110px;
+  min-height: 56px;
+  height: auto;
 }
 textarea:focus {
   border-color: var(--accent);
@@ -521,6 +522,19 @@ textarea::placeholder { color: var(--text3); }
 ───────────────────────────────────────── */
 .section { margin-bottom: 20px; }
 
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(15,23,42,.45);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s ease}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:white;border-radius:20px;padding:32px;max-width:680px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.18);transform:translateY(16px);transition:transform .25s ease}
+.modal-overlay.show .modal{transform:translateY(0)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.modal-title{font-size:18px;font-weight:700;color:var(--text)}
+.modal-close{background:var(--soft);border:1.5px solid var(--border);border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text2);transition:all .2s;padding:0;flex-shrink:0}
+.modal-close:hover{background:var(--border);transform:none;box-shadow:none}
+.modal-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+.modal .examples{gap:10px}
+.modal .example{font-size:14px;padding:10px 16px}
 /* ─────────────────────────────────────────
    FOOTER
 ───────────────────────────────────────── */
@@ -581,7 +595,7 @@ footer {
       <button class="btn btn-primary" onclick="document.getElementById('decisionInput').focus(); document.getElementById('decisionInput').scrollIntoView({behavior:'smooth'})">
         ▶ Nueva decisión
       </button>
-      <button class="btn btn-secondary" onclick="scrollToExamples()">Ver ejemplos →</button>
+      <button class="btn btn-secondary" onclick="openModal()">Ver ejemplos &rarr;</button>
     </div>
   </div>
 
@@ -685,21 +699,44 @@ let activeScale   = 0;
 
 // ── INIT ────────────────────────────────────────
 window.addEventListener('load', () => {
-  const container = document.getElementById('examples');
+  // Auto-resize textarea
+  const ta = document.getElementById('decisionInput');
+  ta.addEventListener('input', () => {
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
+  });
+
+  const container = document.getElementById("examples");
+  const modalContainer = document.getElementById("examplesModal");
   EXAMPLES.forEach(text => {
-    const el = document.createElement('div');
-    el.className = 'example';
-    el.textContent = text;
-    el.onclick = () => {
-      document.getElementById('decisionInput').value = text;
-      document.getElementById('decisionInput').focus();
-    };
-    container.appendChild(el);
+    [container, modalContainer].forEach(parent => {
+      const el = document.createElement("div");
+      el.className = "example";
+      el.textContent = text;
+      el.onclick = () => {
+        document.getElementById("decisionInput").value = text;
+        document.getElementById("decisionInput").focus();
+        const ta = document.getElementById("decisionInput");
+        ta.style.height = "auto";
+        ta.style.height = ta.scrollHeight + "px";
+        closeModal();
+        document.getElementById("decisionInput").scrollIntoView({behavior:"smooth", block:"center"});
+      };
+      parent.appendChild(el);
+    });
   });
 });
 
-function scrollToExamples() {
-  document.getElementById('examplesCard').scrollIntoView({ behavior:'smooth' });
+function openModal() {
+  document.getElementById("modalOverlay").classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+function closeModal() {
+  document.getElementById("modalOverlay").classList.remove("show");
+  document.body.style.overflow = "";
+}
+function closeModalOutside(e) {
+  if (e.target === document.getElementById("modalOverlay")) closeModal();
 }
 
 // ── HELPERS ─────────────────────────────────────
@@ -887,5 +924,16 @@ document.addEventListener('keydown', e => {
 });
 
 </script>
+<!-- MODAL EJEMPLOS -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💡 Ejemplos de decisiones</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-sub">Haz clic en cualquier ejemplo para cargarlo directamente.</div>
+    <div class="examples" id="examplesModal"></div>
+  </div>
+</div>
 </body>
 </html>
