@@ -5,275 +5,658 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Decisiones.ia — Simulador Filosófico</title>
 <style>
-:root{
-  --bg:#f1f5f9;
-  --card:#ffffff;
-  --card-soft:#f8fafc;
-  --accent:#38bdf8;
-  --accent-dark:#0ea5e9;
-  --green:#22c55e;
-  --green-dark:#16a34a;
-  --orange:#f97316;
-  --purple:#8b5cf6;
-  --pink:#f43f5e;
-  --text:#0f172a;
-  --text2:#475569;
-  --text3:#94a3b8;
-  --border:#e2e8f0;
-  --border2:#cbd5e1;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  background:linear-gradient(180deg,#f8fafc,#e2e8f0);
-  color:var(--text);
-  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-  min-height:100vh;
+
+/* ─────────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent:    #38bdf8;
+  --accent-d:  #0ea5e9;
+  --green:     #22c55e;
+  --green-d:   #16a34a;
+  --indigo:    #6366f1;
+  --orange:    #f97316;
+  --purple:    #8b5cf6;
+  --pink:      #f43f5e;
+  --text:      #0f172a;
+  --text2:     #475569;
+  --text3:     #94a3b8;
+  --border:    #e2e8f0;
+  --border2:   #cbd5e1;
+  --soft:      #f8fafc;
 }
 
-/* ── HEADER ── */
-header{
-  background:white;border-bottom:1px solid var(--border);
-  padding:18px 40px;display:flex;justify-content:space-between;align-items:center;
-  position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,0.06);
-}
-.logo{font-weight:800;color:var(--accent);font-size:20px;letter-spacing:-.3px}
-.logo span{color:var(--text);opacity:.3}
-.header-pill{
-  font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;
-  background:#f0f9ff;border:1px solid #bae6fd;color:var(--accent-dark);
-  letter-spacing:.05em;
-}
-.header-pill::before{content:'● ';font-size:8px;color:var(--green)}
-
-/* ── HERO ── */
-.hero{
-  text-align:center;padding:72px 20px 56px;
-  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(56,189,248,0.18),transparent 65%);
-}
-.hero-tag{
-  display:inline-block;font-size:11px;font-weight:600;color:var(--accent-dark);
-  text-transform:uppercase;letter-spacing:.15em;
-  background:#f0f9ff;border:1px solid #bae6fd;
-  padding:5px 14px;border-radius:20px;margin-bottom:22px;
-}
-.hero h1{font-size:clamp(32px,6vw,54px);font-weight:800;margin-bottom:14px;line-height:1.12;letter-spacing:-.02em}
-.hero span{color:var(--accent)}
-.hero p{max-width:560px;margin:0 auto;color:var(--text2);font-size:16px;line-height:1.75}
-
-/* ── LAYOUT ── */
-.container{max-width:900px;margin:0 auto;padding:0 20px 80px}
-
-/* ── CARD ── */
-.card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:16px;padding:28px 30px;margin-bottom:20px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.06);
-  transition:box-shadow .25s;
-}
-.card:hover{box-shadow:0 8px 30px rgba(0,0,0,0.1)}
-
-.section-title{
-  font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--accent-dark);margin-bottom:16px;
-  display:flex;align-items:center;gap:10px;
-}
-.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
-
-/* ── TEXTAREA ── */
-textarea{
-  width:100%;height:110px;border-radius:10px;border:1.5px solid var(--border);
-  background:var(--card-soft);padding:14px 16px;font-size:15px;
-  color:var(--text);resize:none;outline:none;font-family:inherit;
-  line-height:1.6;transition:border-color .2s,box-shadow .2s;
-}
-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,0.12)}
-textarea::placeholder{color:var(--text3)}
-
-/* ── ACTION ROW ── */
-.action{display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:10px}
-.action-hint{font-size:12px;color:var(--text3)}
-
-/* ── BUTTONS ── */
-button{
-  background:var(--green);color:white;border:none;
-  padding:13px 26px;border-radius:10px;font-size:15px;font-weight:600;
-  cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px;
-  font-family:inherit;
-}
-button:hover{background:var(--green-dark);transform:scale(1.03);box-shadow:0 6px 18px rgba(34,197,94,0.3)}
-button:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
-
-.btn-ghost{
-  background:transparent;border:1.5px solid var(--border2);color:var(--text2);
-  font-size:13px;padding:9px 18px;
-}
-.btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:#f0f9ff;transform:none;box-shadow:none}
-
-.btn-primary{
-  background:linear-gradient(135deg,var(--accent),var(--accent-dark));
-  box-shadow:0 4px 16px rgba(56,189,248,0.3);
-}
-.btn-primary:hover{box-shadow:0 6px 24px rgba(56,189,248,0.4);background:linear-gradient(135deg,var(--accent-dark),#0284c7)}
-
-/* ── SPINNER ── */
-.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── EXAMPLES ── */
-.examples{display:flex;flex-wrap:wrap;gap:9px}
-.example{
-  padding:9px 16px;border:1px solid var(--border);background:white;
-  border-radius:999px;font-size:13px;cursor:pointer;color:var(--text2);
-  transition:.2s;font-family:inherit;
-}
-.example:hover{border-color:var(--accent);color:var(--accent);background:#f0f9ff;transform:none;box-shadow:none}
-
-/* ── ERROR ── */
-.error{
-  background:#fff5f5;border:1px solid #fecaca;border-left:3px solid #ef4444;
-  border-radius:10px;padding:12px 16px;color:#dc2626;font-size:13px;
-  margin-top:14px;display:none;
-}
-.error.show{display:block}
-
-/* ── RESULT ── */
-#result{display:none;animation:fadein .4s ease both}
-#result.show{display:block}
-@keyframes fadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-
-/* Decision badge */
-.badge{
-  display:inline-flex;align-items:center;gap:6px;
-  font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-  padding:5px 14px;border-radius:20px;border:1.5px solid;margin-bottom:14px;
-}
-.badge-dot{width:6px;height:6px;border-radius:50%}
-.result-quote{
-  font-size:15px;color:var(--text2);font-style:italic;
-  border-left:3px solid var(--orange);padding-left:16px;
-  margin-bottom:14px;line-height:1.7;
-}
-.result-essence{
-  font-size:clamp(22px,4vw,32px);font-weight:800;
-  color:var(--text);line-height:1.2;letter-spacing:-.02em;
-}
-.progress{height:4px;background:var(--border);border-radius:10px;margin-top:20px;overflow:hidden}
-.progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--accent));border-radius:10px;transition:width .6s ease}
-
-/* ── TABS ── */
-.tabs{display:flex;gap:0;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:18px}
-.tab{
-  flex:1;padding:11px 6px;text-align:center;cursor:pointer;
-  font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-  background:var(--card-soft);color:var(--text3);border:none;
-  border-right:1px solid var(--border);transition:all .2s;font-family:inherit;
-}
-.tab:last-child{border-right:none}
-.tab:hover{background:#f0f9ff;color:var(--accent)}
-
-/* ── PATH CARDS ── */
-.paths{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:540px){.paths{grid-template-columns:1fr}}
-.path-card{
-  background:var(--card-soft);border-radius:12px;padding:18px 20px;
-  border:1.5px solid var(--border);
-}
-.path-label{
-  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
-  margin-bottom:10px;display:flex;align-items:center;gap:7px;
-}
-.path-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.path-text{font-size:14px;color:var(--text2);line-height:1.8}
-
-/* ── TIMELINE ── */
-.tl-row{
-  display:grid;grid-template-columns:130px 1fr;gap:16px;
-  padding:14px 0;border-bottom:1px solid var(--border);align-items:start;
-}
-.tl-row:last-child{border-bottom:none;padding-bottom:0}
-.tl-time{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding-top:2px}
-.tl-text{font-size:14px;color:var(--text2);line-height:1.75}
-@media(max-width:480px){.tl-row{grid-template-columns:1fr}.tl-time{padding-bottom:2px}}
-
-/* ── INSIGHTS ── */
-.insight{
-  background:var(--card-soft);border-radius:12px;padding:18px 20px;
-  margin-bottom:14px;border:1.5px solid var(--border);border-left:3px solid;
-}
-.insight-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;margin-bottom:9px}
-.insight-text{font-size:15px;color:var(--text2);line-height:1.8;font-style:italic}
-
-/* ── QUESTION BOX ── */
-.qbox{
-  background:linear-gradient(135deg,#0f172a,#1e293b);
-  border-radius:16px;padding:44px 30px;text-align:center;
-  margin-bottom:0;position:relative;overflow:hidden;
-  box-shadow:0 10px 40px rgba(15,23,42,0.2);
-}
-.qbox::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--green),var(--accent));
-}
-.qbox::after{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(56,189,248,0.08),transparent 70%);
-}
-.qbox-inner{position:relative;z-index:1}
-.q-eyebrow{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.2em;margin-bottom:18px}
-.q-text{
-  font-size:clamp(20px,4vw,30px);font-weight:800;color:white;
-  line-height:1.3;max-width:580px;margin:0 auto 30px;letter-spacing:-.02em;
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(56,189,248,.22), transparent 42%),
+    radial-gradient(circle at 80% 30%, rgba(99,102,241,.16), transparent 46%),
+    linear-gradient(180deg, #f8fafc, #e2e8f0);
 }
 
-footer{padding:28px;font-size:13px;color:var(--text3);text-align:center}
+/* ─────────────────────────────────────────
+   HEADER
+───────────────────────────────────────── */
+header {
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  position: sticky; top: 0; z-index: 200;
+}
+.header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.4px;
+}
+.logo em { color: var(--accent); font-style: normal; }
+.header-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  background: var(--soft);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+}
+.header-badge::before {
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px rgba(34,197,94,.5);
+  animation: blink 2s ease infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* ─────────────────────────────────────────
+   LAYOUT
+───────────────────────────────────────── */
+.page { max-width: 1100px; margin: 0 auto; padding: 0 24px 100px; }
+
+/* ─────────────────────────────────────────
+   HERO
+───────────────────────────────────────── */
+.hero {
+  text-align: center;
+  padding: 88px 20px 72px;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-d);
+  background: rgba(56,189,248,.1);
+  border: 1px solid rgba(56,189,248,.3);
+  border-radius: 20px;
+  padding: 6px 16px;
+  margin-bottom: 28px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.hero-eyebrow svg { width: 14px; height: 14px; flex-shrink: 0; }
+.hero h1 {
+  font-size: clamp(38px, 6.5vw, 68px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -.03em;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+.hero h1 span {
+  background: linear-gradient(135deg, var(--accent), var(--indigo));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub {
+  font-size: 18px;
+  color: var(--text2);
+  max-width: 520px;
+  margin: 0 auto 36px;
+  line-height: 1.7;
+}
+.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ─────────────────────────────────────────
+   BUTTONS
+───────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 26px;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.btn:active { transform: scale(.97) !important; }
+
+.btn-primary {
+  background: var(--green);
+  color: white;
+  box-shadow: 0 4px 14px rgba(34,197,94,.3);
+}
+.btn-primary:hover {
+  background: var(--green-d);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(34,197,94,.35);
+}
+.btn-primary:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-secondary {
+  background: white;
+  color: var(--text);
+  border: 1.5px solid var(--border2);
+}
+.btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent-d);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,.08);
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, var(--accent), var(--indigo));
+  color: white;
+  box-shadow: 0 4px 18px rgba(56,189,248,.3);
+}
+.btn-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(56,189,248,.4);
+}
+
+/* Spinner inside btn */
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─────────────────────────────────────────
+   CARDS
+───────────────────────────────────────── */
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 30px;
+  border: 1px solid var(--border);
+  box-shadow:
+    0 10px 25px rgba(0,0,0,.08),
+    0 2px 6px rgba(0,0,0,.04);
+  transition: all .25s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 20px 45px rgba(0,0,0,.11),
+    0 5px 12px rgba(0,0,0,.07);
+}
+/* Prevent hover lift on interactive cards */
+.card.no-hover:hover { transform: none; box-shadow: 0 10px 25px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04); }
+
+.card-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--text3);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ─────────────────────────────────────────
+   INPUT SECTION
+───────────────────────────────────────── */
+#inputSection { animation: fadein .35s ease both; }
+
+textarea {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--soft);
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text);
+  resize: none;
+  outline: none;
+  line-height: 1.65;
+  transition: border-color .2s, box-shadow .2s;
+  min-height: 110px;
+}
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(56,189,248,.12);
+  background: white;
+}
+textarea::placeholder { color: var(--text3); }
+
+.input-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.input-hint { font-size: 12px; color: var(--text3); }
+
+/* ─────────────────────────────────────────
+   EXAMPLES
+───────────────────────────────────────── */
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.example {
+  padding: 9px 16px;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 999px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+.example:hover {
+  border-color: var(--accent);
+  color: var(--accent-d);
+  background: rgba(56,189,248,.05);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(56,189,248,.15);
+}
+
+/* ─────────────────────────────────────────
+   ERROR
+───────────────────────────────────────── */
+.error {
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  border-left: 3px solid #ef4444;
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: #dc2626;
+  font-size: 13px;
+  margin-top: 14px;
+  display: none;
+}
+.error.show { display: block; }
+
+/* ─────────────────────────────────────────
+   RESULT
+───────────────────────────────────────── */
+#result { display: none; }
+#result.show { display: block; animation: fadein .45s ease both; }
+@keyframes fadein { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+.result-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0 6px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Decision type badge */
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1.5px solid;
+  margin-bottom: 16px;
+}
+.type-badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+.result-quote {
+  font-size: 15px;
+  color: var(--text2);
+  font-style: italic;
+  border-left: 3px solid var(--orange);
+  padding-left: 16px;
+  margin-bottom: 16px;
+  line-height: 1.7;
+}
+.result-essence {
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.18;
+  letter-spacing: -.025em;
+}
+.progress-bar-wrap {
+  height: 4px;
+  background: var(--border);
+  border-radius: 10px;
+  margin-top: 22px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--green), var(--accent));
+  border-radius: 10px;
+  transition: width .6s ease;
+}
+
+/* ─────────────────────────────────────────
+   IMPACT GRID
+───────────────────────────────────────── */
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.impact-tab {
+  padding: 13px 8px;
+  text-align: center;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--soft);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text3);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .2s;
+}
+.impact-tab:hover { border-color: var(--border2); color: var(--text2); background: white; transform: translateY(-1px); }
+
+/* ─────────────────────────────────────────
+   RESULTS (si/no)
+───────────────────────────────────────── */
+.results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.result-card {
+  background: var(--soft);
+  border-radius: 14px;
+  padding: 20px 22px;
+  border: 1.5px solid var(--border);
+  transition: all .2s;
+}
+.result-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.08); }
+.result-card-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.rc-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.result-card-text { font-size: 14px; color: var(--text2); line-height: 1.8; }
+
+/* ─────────────────────────────────────────
+   TIMELINE
+───────────────────────────────────────── */
+.tl-item {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: start;
+}
+.tl-item:last-child { border-bottom: none; padding-bottom: 0; }
+.tl-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding-top: 2px;
+}
+.tl-text { font-size: 14px; color: var(--text2); line-height: 1.75; }
+
+/* ─────────────────────────────────────────
+   INSIGHT CARDS
+───────────────────────────────────────── */
+.insight {
+  background: var(--soft);
+  border-radius: 14px;
+  padding: 20px 22px;
+  border: 1.5px solid var(--border);
+  border-left: 3px solid;
+  margin-bottom: 14px;
+}
+.insight-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  margin-bottom: 9px;
+}
+.insight-text { font-size: 15px; color: var(--text2); line-height: 1.8; font-style: italic; }
+
+/* ─────────────────────────────────────────
+   QUESTION BOX
+───────────────────────────────────────── */
+.qbox {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 20px;
+  padding: 52px 36px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(15,23,42,.25);
+}
+.qbox::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--green), var(--accent), var(--indigo));
+}
+.qbox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(56,189,248,.08), transparent 65%);
+  pointer-events: none;
+}
+.qbox-inner { position: relative; z-index: 1; }
+.q-eyebrow {
+  font-size: 11px;
+  color: rgba(255,255,255,.4);
+  text-transform: uppercase;
+  letter-spacing: .22em;
+  margin-bottom: 20px;
+}
+.q-text {
+  font-size: clamp(20px, 4vw, 30px);
+  font-weight: 800;
+  color: white;
+  line-height: 1.3;
+  max-width: 600px;
+  margin: 0 auto 32px;
+  letter-spacing: -.02em;
+}
+
+/* ─────────────────────────────────────────
+   SECTION SPACING
+───────────────────────────────────────── */
+.section { margin-bottom: 20px; }
+
+/* ─────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 30px 20px;
+  font-size: 13px;
+  color: var(--text3);
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero h1 { font-size: 38px; }
+  .results { grid-template-columns: 1fr; }
+  .impact-grid { grid-template-columns: repeat(2,1fr); }
+  header { padding: 0 20px; }
+}
+@media (max-width: 600px) {
+  .hero { padding: 56px 16px 48px; }
+  .hero h1 { font-size: 30px; }
+  .impact-grid { grid-template-columns: 1fr 1fr; }
+  .card { padding: 22px 18px; }
+  .tl-item { grid-template-columns: 1fr; }
+  .tl-label { padding-bottom: 2px; }
+  .qbox { padding: 36px 22px; }
+}
 </style>
 </head>
 <body>
 
+<!-- ═══════════════ HEADER ═══════════════ -->
 <header>
-  <div class="logo">Decisiones<span>.</span>ia</div>
-  <div class="header-pill">Groq · llama-3.3-70b</div>
+  <div class="header-inner">
+    <div class="logo">decisiones<em>.ia</em></div>
+    <div class="header-badge">Groq · llama-3.3-70b</div>
+  </div>
 </header>
 
-<div class="hero">
-  <div class="hero-tag">Simulador filosófico de decisiones vitales</div>
-  <h1>Cada decisión que tomas<br><span>reescribe tu futuro</span></h1>
-  <p>Analiza cualquier decisión —cotidiana o trascendental— y descubre sus consecuencias filosóficas, temporales y humanas.</p>
-</div>
+<!-- ═══════════════ PAGE ═══════════════ -->
+<div class="page">
 
-<div class="container">
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Simulador filosófico de decisiones vitales
+    </div>
+    <h1>
+      Cada decisión que tomas<br>
+      <span>reescribe tu futuro</span>
+    </h1>
+    <p class="hero-sub">
+      Analiza cualquier decisión —cotidiana o trascendental— y descubre sus consecuencias filosóficas, temporales y humanas.
+    </p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="document.getElementById('decisionInput').focus(); document.getElementById('decisionInput').scrollIntoView({behavior:'smooth'})">
+        ▶ Nueva decisión
+      </button>
+      <button class="btn btn-secondary" onclick="scrollToExamples()">Ver ejemplos →</button>
+    </div>
+  </div>
 
+  <!-- ═══════════════ INPUT SECTION ═══════════════ -->
   <div id="inputSection">
-    <div class="card">
-      <div class="section-title">Tu decisión</div>
-      <textarea id="decisionInput" placeholder="Describe la decisión que estás considerando…"></textarea>
-      <div class="action">
-        <span class="action-hint">Ctrl + Enter para simular</span>
-        <button id="simBtn" onclick="simulate()">▶ Simular decisión</button>
+
+    <div class="card no-hover section">
+      <div class="card-label">Tu decisión</div>
+      <textarea
+        id="decisionInput"
+        rows="4"
+        placeholder="Describe la decisión que estás considerando… puede ser algo cotidiano o algo que cambie tu vida.">
+      </textarea>
+      <div class="input-row">
+        <span class="input-hint">Ctrl + Enter para simular</span>
+        <button class="btn btn-primary" id="simBtn" onclick="simulate()">▶ Simular decisión</button>
       </div>
       <div class="error" id="error"></div>
     </div>
 
-    <div class="card">
-      <div class="section-title">Ejemplos</div>
+    <div class="card no-hover section" id="examplesCard">
+      <div class="card-label">Ejemplos de decisiones</div>
       <div class="examples" id="examples"></div>
     </div>
+
   </div>
 
+  <!-- ═══════════════ RESULT ═══════════════ -->
   <div id="result">
-    <div style="padding:20px 0 4px">
-      <button class="btn-ghost" onclick="goBack()">← Nueva decisión</button>
-    </div>
-    <div id="resultContent"></div>
-  </div>
 
+    <div class="result-nav">
+      <button class="btn btn-secondary" onclick="goBack()">← Nueva decisión</button>
+    </div>
+
+    <!-- 1. HEADER CARD -->
+    <div class="card no-hover section" id="r-header"></div>
+
+    <!-- 2. IMPACT CARD -->
+    <div class="card no-hover section" id="r-impact">
+      <div class="card-label">Escala de impacto</div>
+      <div class="impact-grid" id="impactTabs"></div>
+      <div style="margin-top:18px">
+        <div class="results" id="resultPaths"></div>
+      </div>
+    </div>
+
+    <!-- 3. TIMELINE CARD -->
+    <div class="card no-hover section" id="r-timeline">
+      <div class="card-label">Línea temporal — si lo haces</div>
+      <div id="timelineContent"></div>
+    </div>
+
+    <!-- 4. INSIGHTS -->
+    <div id="r-insights"></div>
+
+    <!-- 5. QUESTION -->
+    <div class="qbox section" id="r-question">
+      <div class="qbox-inner">
+        <div class="q-eyebrow">Antes de decidir, pregúntate</div>
+        <div class="q-text" id="questionText"></div>
+        <button class="btn btn-accent" onclick="goBack()">▶ Simular otra decisión</button>
+      </div>
+    </div>
+
+  </div>
 </div>
 
-<footer>Simulador de decisiones vitales · Groq llama-3.3-70b-versatile</footer>
+<footer>decisiones.ia · Simulador filosófico impulsado por Groq llama-3.3-70b</footer>
 
+<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
 <script>
+
+// ── CONFIG ──────────────────────────────────────
 // ⚠️ Reemplaza con tu key de Groq (console.groq.com)
-const GROQ_KEY = "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";
+const GROQ_KEY = "TU_KEY_DE_GROQ_AQUI";
 
 const EXAMPLES = [
   "Renunciar a mi trabajo para montar mi propio negocio",
@@ -286,46 +669,70 @@ const EXAMPLES = [
   "Pedir un aumento de sueldo",
 ];
 
-const SCALE_KEYS   = ["individual","familiar","social","global"];
-const SCALE_LABELS = ["Individual","Familiar","Social","Global"];
-const SCALE_COLORS = ["#0ea5e9","#f97316","#22c55e","#8b5cf6"];
-const TL_COLORS    = ["#0ea5e9","#f97316","#22c55e","#8b5cf6","#f43f5e"];
-const TYPE_CFG     = {
-  simple:        { color:"#22c55e", label:"Decisión Simple" },
-  compleja:      { color:"#f97316", label:"Decisión Compleja" },
-  trascendental: { color:"#f43f5e", label:"Decisión Trascendental" },
+const SCALE_KEYS   = ["individual", "familiar", "social", "global"];
+const SCALE_LABELS = ["Individual", "Familiar", "Social", "Global"];
+const SCALE_COLORS = ["#0ea5e9", "#f97316", "#22c55e", "#8b5cf6"];
+const TL_COLORS    = ["#0ea5e9", "#f97316", "#22c55e", "#8b5cf6", "#f43f5e"];
+
+const TYPE_CFG = {
+  simple:        { color: "#22c55e", label: "Decisión Simple" },
+  compleja:      { color: "#f97316", label: "Decisión Compleja" },
+  trascendental: { color: "#f43f5e", label: "Decisión Trascendental" },
 };
 
-let currentResult = null, activeScale = 0;
+let currentResult = null;
+let activeScale   = 0;
 
+// ── INIT ────────────────────────────────────────
 window.addEventListener('load', () => {
-  const ex = document.getElementById('examples');
-  EXAMPLES.forEach(e => {
-    const d = document.createElement('div');
-    d.className = 'example';
-    d.textContent = e;
-    d.onclick = () => { document.getElementById('decisionInput').value = e; };
-    ex.appendChild(d);
+  const container = document.getElementById('examples');
+  EXAMPLES.forEach(text => {
+    const el = document.createElement('div');
+    el.className = 'example';
+    el.textContent = text;
+    el.onclick = () => {
+      document.getElementById('decisionInput').value = text;
+      document.getElementById('decisionInput').focus();
+    };
+    container.appendChild(el);
   });
 });
 
-function showError(msg){ const el=document.getElementById('error'); el.textContent=msg; el.classList.add('show'); }
-function hideError(){ document.getElementById('error').classList.remove('show'); }
-function esc(s=''){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function scrollToExamples() {
+  document.getElementById('examplesCard').scrollIntoView({ behavior:'smooth' });
+}
 
-function goBack(){
+// ── HELPERS ─────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('error');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideError() {
+  document.getElementById('error').classList.remove('show');
+}
+function esc(s = '') {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── GO BACK ─────────────────────────────────────
+function goBack() {
   document.getElementById('result').classList.remove('show');
   document.getElementById('result').style.display = 'none';
   document.getElementById('inputSection').style.display = 'block';
   document.getElementById('decisionInput').value = '';
-  document.getElementById('resultContent').innerHTML = '';
-  hideError(); currentResult = null; activeScale = 0;
-  window.scrollTo({ top:0, behavior:'smooth' });
+  hideError();
+  currentResult = null;
+  activeScale   = 0;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-async function simulate(){
+// ── SIMULATE ────────────────────────────────────
+async function simulate() {
   const decision = document.getElementById('decisionInput').value.trim();
-  if(!decision){ showError('Escribe una decisión primero.'); return; }
+  if (!decision) { showError('Escribe una decisión primero.'); return; }
 
   const btn = document.getElementById('simBtn');
   btn.disabled = true;
@@ -340,26 +747,33 @@ Responde ÚNICAMENTE con JSON válido sin markdown ni texto extra. Máximo 1 ora
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + GROQ_KEY },
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + GROQ_KEY,
+      },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        max_tokens: 2000,
+        model:       'llama-3.3-70b-versatile',
+        max_tokens:  2000,
         temperature: 0.75,
         messages: [
           { role:'system', content:'Responde ÚNICAMENTE con JSON válido, sin markdown, sin texto extra.' },
-          { role:'user', content: prompt }
-        ]
-      })
+          { role:'user',   content: prompt },
+        ],
+      }),
     });
+
     const data = await res.json();
-    if(!res.ok) throw new Error(data.error?.message || 'Error en la API');
-    const raw = data.choices?.[0]?.message?.content || '';
-    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
-    currentResult = parsed;
+    if (!res.ok) throw new Error(data.error?.message || 'Error en la API');
+
+    const raw    = data.choices?.[0]?.message?.content || '';
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+
+    currentResult           = parsed;
     currentResult._decision = decision;
-    activeScale = 0;
+    activeScale             = 0;
+
     renderResult();
-  } catch(e) {
+  } catch (e) {
     showError('Error: ' + e.message);
   } finally {
     btn.disabled = false;
@@ -367,108 +781,112 @@ Responde ÚNICAMENTE con JSON válido sin markdown ni texto extra. Máximo 1 ora
   }
 }
 
-function renderResult(){
-  const r = currentResult;
+// ── RENDER RESULT ───────────────────────────────
+function renderResult() {
+  const r  = currentResult;
   const tc = TYPE_CFG[r.decision_type] || TYPE_CFG.compleja;
 
-  document.getElementById('resultContent').innerHTML = `
+  // 1. Header card
+  document.getElementById('r-header').innerHTML = `
+    <span class="type-badge" style="color:${tc.color};border-color:${tc.color}55;background:${tc.color}10">
+      <span class="type-badge-dot" style="background:${tc.color}"></span>${tc.label}
+    </span>
+    <div class="result-quote">"${esc(r._decision)}"</div>
+    <div class="result-essence">${esc(r.essence)}</div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+  `;
+  setTimeout(() => {
+    const pb = document.getElementById('pbar');
+    if (pb) pb.style.width = '100%';
+  }, 60);
 
-    <div class="card" style="margin-top:16px">
-      <span class="badge" style="color:${tc.color};border-color:${tc.color}55;background:${tc.color}12">
-        <span class="badge-dot" style="background:${tc.color}"></span>${tc.label}
-      </span>
-      <div class="result-quote">"${esc(r._decision)}"</div>
-      <div class="result-essence">${esc(r.essence)}</div>
-      <div class="progress"><div class="progress-bar" id="pbar"></div></div>
-    </div>
+  // 2. Impact tabs
+  document.getElementById('impactTabs').innerHTML = SCALE_LABELS.map((l, i) => `
+    <button class="impact-tab" id="itab${i}" onclick="setScale(${i})"
+      style="${i===activeScale ? `background:${SCALE_COLORS[i]}15;color:${SCALE_COLORS[i]};border-color:${SCALE_COLORS[i]}55;box-shadow:0 3px 10px ${SCALE_COLORS[i]}22` : ''}">
+      ${l}
+    </button>`).join('');
+  renderPaths();
 
-    <div class="card">
-      <div class="section-title">Escala de impacto</div>
-      <div class="tabs">
-        ${SCALE_LABELS.map((l,i) => `
-          <button class="tab" id="stab${i}" onclick="setScale(${i})"
-            style="${i===activeScale ? `background:${SCALE_COLORS[i]}15;color:${SCALE_COLORS[i]};border-bottom:2px solid ${SCALE_COLORS[i]}` : ''}">
-            ${l}</button>`).join('')}
-      </div>
-      <div class="paths" id="paths">${renderPaths()}</div>
-    </div>
+  // 3. Timeline
+  document.getElementById('timelineContent').innerHTML =
+    r.timeline.map((t, i) => `
+      <div class="tl-item">
+        <div class="tl-label" style="color:${TL_COLORS[i]}">${esc(t.time)}</div>
+        <div class="tl-text">${esc(t.text)}</div>
+      </div>`).join('');
 
-    <div class="card">
-      <div class="section-title">Línea temporal — si lo haces</div>
-      ${r.timeline.map((t,i) => `
-        <div class="tl-row">
-          <div class="tl-time" style="color:${TL_COLORS[i]}">${esc(t.time)}</div>
-          <div class="tl-text">${esc(t.text)}</div>
-        </div>`).join('')}
-    </div>
-
+  // 4. Insights
+  document.getElementById('r-insights').innerHTML = `
     <div class="insight" style="border-left-color:var(--purple)">
-      <div class="insight-title" style="color:var(--purple)">Paradoja oculta</div>
+      <div class="insight-label" style="color:var(--purple)">Paradoja oculta</div>
       <div class="insight-text">${esc(r.paradox)}</div>
     </div>
-    <div class="insight" style="border-left-color:var(--accent)">
-      <div class="insight-title" style="color:var(--accent-dark)">Reflexión filosófica</div>
+    <div class="insight" style="border-left-color:var(--accent-d)">
+      <div class="insight-label" style="color:var(--accent-d)">Reflexión filosófica</div>
       <div class="insight-text">${esc(r.philosophy)}</div>
     </div>
-
-    <div class="card qbox">
-      <div class="qbox-inner">
-        <div class="q-eyebrow">Antes de decidir, pregúntate</div>
-        <div class="q-text">${esc(r.question)}</div>
-        <button class="btn-primary" onclick="goBack()">▶ Simular otra decisión</button>
-      </div>
-    </div>
-
   `;
 
-  setTimeout(() => { const pb=document.getElementById('pbar'); if(pb) pb.style.width='100%'; }, 60);
+  // 5. Question
+  document.getElementById('questionText').textContent = r.question;
 
+  // Show result
   document.getElementById('inputSection').style.display = 'none';
-  document.getElementById('result').classList.add('show');
-  document.getElementById('result').style.display = 'block';
-  window.scrollTo({ top:0, behavior:'smooth' });
+  const resultEl = document.getElementById('result');
+  resultEl.style.display = 'block';
+  resultEl.classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function renderPaths(){
-  const r = currentResult;
+// ── RENDER PATHS ────────────────────────────────
+function renderPaths() {
+  const r     = currentResult;
   const scale = r.scales[SCALE_KEYS[activeScale]];
   const color = SCALE_COLORS[activeScale];
-  return `
-    <div class="path-card" style="border-top:2px solid ${color}">
-      <div class="path-label" style="color:${color}">
-        <span class="path-dot" style="background:${color}"></span>${esc(scale.si.label)}
+
+  document.getElementById('resultPaths').innerHTML = `
+    <div class="result-card" style="border-top:3px solid ${color}">
+      <div class="result-card-label" style="color:${color}">
+        <span class="rc-dot" style="background:${color}"></span>${esc(scale.si.label)}
       </div>
-      <div class="path-text">${esc(scale.si.text)}</div>
+      <div class="result-card-text">${esc(scale.si.text)}</div>
     </div>
-    <div class="path-card">
-      <div class="path-label" style="color:var(--text3)">
-        <span class="path-dot" style="background:var(--text3)"></span>${esc(scale.no.label)}
+    <div class="result-card">
+      <div class="result-card-label" style="color:var(--text3)">
+        <span class="rc-dot" style="background:var(--text3)"></span>${esc(scale.no.label)}
       </div>
-      <div class="path-text">${esc(scale.no.text)}</div>
-    </div>`;
+      <div class="result-card-text">${esc(scale.no.text)}</div>
+    </div>
+  `;
 }
 
-function setScale(i){
+// ── SET SCALE ───────────────────────────────────
+function setScale(i) {
   activeScale = i;
-  SCALE_LABELS.forEach((_,idx) => {
-    const tab = document.getElementById('stab'+idx);
-    if(!tab) return;
-    if(idx===i){
-      tab.style.background = SCALE_COLORS[idx]+'15';
-      tab.style.color = SCALE_COLORS[idx];
-      tab.style.borderBottom = `2px solid ${SCALE_COLORS[idx]}`;
+  SCALE_LABELS.forEach((_, idx) => {
+    const tab = document.getElementById('itab' + idx);
+    if (!tab) return;
+    if (idx === i) {
+      tab.style.background  = SCALE_COLORS[idx] + '15';
+      tab.style.color       = SCALE_COLORS[idx];
+      tab.style.borderColor = SCALE_COLORS[idx] + '55';
+      tab.style.boxShadow   = `0 3px 10px ${SCALE_COLORS[idx]}22`;
     } else {
-      tab.style.background = 'var(--card-soft)';
-      tab.style.color = 'var(--text3)';
-      tab.style.borderBottom = 'none';
+      tab.style.background  = 'var(--soft)';
+      tab.style.color       = 'var(--text3)';
+      tab.style.borderColor = 'var(--border)';
+      tab.style.boxShadow   = 'none';
     }
   });
-  document.getElementById('paths').innerHTML = renderPaths();
+  renderPaths();
 }
 
+// ── KEYBOARD SHORTCUT ───────────────────────────
 document.addEventListener('keydown', e => {
-  if((e.ctrlKey || e.metaKey) && e.key === 'Enter') simulate();
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') simulate();
 });
+
 </script>
 </body>
 </html>
