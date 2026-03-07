@@ -655,8 +655,8 @@ footer {
 <script>
 
 // ── CONFIG ──────────────────────────────────────
-// ⚠️ Reemplaza con tu key de Groq (console.groq.com)
-const GROQ_KEY = "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";
+// Proxy seguro via Cloudflare Worker (key oculta en el servidor)
+const WORKER_URL = "https://groq-proxy.johalisg.trabajadores.dev";
 
 const EXAMPLES = [
   "Renunciar a mi trabajo para montar mi propio negocio",
@@ -745,11 +745,10 @@ Responde ÚNICAMENTE con JSON válido sin markdown ni texto extra. Máximo 1 ora
 {"decision_type":"simple|compleja|trascendental","essence":"frase poética impactante máximo 10 palabras","scales":{"individual":{"si":{"label":"Si lo haces","text":"1 oración"},"no":{"label":"Si no lo haces","text":"1 oración"}},"familiar":{"si":{"label":"Si lo haces","text":"1 oración"},"no":{"label":"Si no lo haces","text":"1 oración"}},"social":{"si":{"label":"Si lo haces","text":"1 oración"},"no":{"label":"Si no lo haces","text":"1 oración"}},"global":{"si":{"label":"Si lo haces","text":"1 oración"},"no":{"label":"Si no lo haces","text":"1 oración"}}},"timeline":[{"time":"Próximas horas","text":"1 oración"},{"time":"Próximos meses","text":"1 oración"},{"time":"Próximos años","text":"1 oración"},{"time":"En décadas","text":"1 oración"},{"time":"Tu legado","text":"1 oración"}],"paradox":"1 oración","philosophy":"1 oración sin juicio moral","question":"pregunta socrática breve máximo 12 palabras"}`;
 
   try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: {
-        'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + GROQ_KEY,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model:       'llama-3.3-70b-versatile',
