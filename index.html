@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -88,14 +88,14 @@ header {
 /* ─────────────────────────────────────────
    LAYOUT
 ───────────────────────────────────────── */
-.page { max-width: 1100px; margin: 0 auto; padding: 0 24px 100px; }
+.page { max-width: 1100px; margin: 0 auto; padding: 0 24px 40px; }
 
 /* ─────────────────────────────────────────
    HERO
 ───────────────────────────────────────── */
 .hero {
   text-align: center;
-  padding: 88px 20px 72px;
+  padding: 60px 20px 40px;
 }
 .hero-eyebrow {
   display: inline-flex;
@@ -251,15 +251,14 @@ textarea {
   outline: none;
   line-height: 1.65;
   transition: border-color .2s, box-shadow .2s;
-  min-height: 56px;
-  height: auto;
+  min-height: 80px;
 }
 textarea:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(56,189,248,.12);
   background: white;
 }
-textarea::placeholder { color: var(--text3); }
+textarea::placeholder { color: #94a3b8; font-style: italic; }
 
 .input-row {
   display: flex;
@@ -604,11 +603,7 @@ footer {
 
     <div class="card no-hover section">
       <div class="card-label">Tu decisión</div>
-      <textarea
-        id="decisionInput"
-        rows="4"
-        placeholder="Describe la decisión que estás considerando… puede ser algo cotidiano o algo que cambie tu vida.">
-      </textarea>
+      <textarea id="decisionInput" rows="3" placeholder="Describe la decisión que estás considerando… puede ser algo cotidiano o algo que cambie tu vida."></textarea>
       <div class="input-row">
         <span class="input-hint">Ctrl + Enter para simular</span>
         <button class="btn btn-primary" id="simBtn" onclick="simulate()">▶ Simular decisión</button>
@@ -616,10 +611,6 @@ footer {
       <div class="error" id="error"></div>
     </div>
 
-    <div class="card no-hover section" id="examplesCard">
-      <div class="card-label">Ejemplos de decisiones</div>
-      <div class="examples" id="examples"></div>
-    </div>
 
   </div>
 
@@ -706,24 +697,21 @@ window.addEventListener('load', () => {
     ta.style.height = ta.scrollHeight + 'px';
   });
 
-  const container = document.getElementById("examples");
   const modalContainer = document.getElementById("examplesModal");
   EXAMPLES.forEach(text => {
-    [container, modalContainer].forEach(parent => {
-      const el = document.createElement("div");
-      el.className = "example";
-      el.textContent = text;
-      el.onclick = () => {
-        document.getElementById("decisionInput").value = text;
-        document.getElementById("decisionInput").focus();
-        const ta = document.getElementById("decisionInput");
-        ta.style.height = "auto";
-        ta.style.height = ta.scrollHeight + "px";
-        closeModal();
-        document.getElementById("decisionInput").scrollIntoView({behavior:"smooth", block:"center"});
-      };
-      parent.appendChild(el);
-    });
+    const el = document.createElement("div");
+    el.className = "example";
+    el.textContent = text;
+    el.onclick = () => {
+      document.getElementById("decisionInput").value = text;
+      document.getElementById("decisionInput").focus();
+      const ta = document.getElementById("decisionInput");
+      ta.style.height = "auto";
+      ta.style.height = ta.scrollHeight + "px";
+      closeModal();
+      document.getElementById("decisionInput").scrollIntoView({behavior:"smooth", block:"center"});
+    };
+    modalContainer.appendChild(el);
   });
 });
 
